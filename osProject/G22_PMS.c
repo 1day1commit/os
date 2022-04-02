@@ -70,6 +70,7 @@ int main() {
     int toParent[13][2];
     int pid = 0;
     int index = 0;
+    
     struct Staff staff[8];
     struct Project project[5];
     
@@ -216,7 +217,6 @@ int main() {
                         strncpy(useful_inf, command + 8, 30);
                         if (single_input_meeting_request(toChild, useful_inf) < 0) {
                             printf(">>>>>>Invalid time\n");
-
                         } else {
                             printf(">>>>>>Record\n");
                         }
