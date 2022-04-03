@@ -54,7 +54,7 @@ int batch_input_meeting_request(int fd[13][2], char* useful_inf);
 void meeting_attendance_request(int fd[13][2]);
 void FCFS(int fd[13][2]);
 void SJF(int fd[13][2]);
-void print_schedule();
+void print_schedule(struct Project project[], struct Staff staff[], char* algorithm);
 void analyse_attendance(int fd[13][2]);
 
 
@@ -562,7 +562,7 @@ void print_schedule(struct Project project[], struct Staff staff[], char* algori
     char* startDate = "2022-04-25";
     char* endDate = "2022-04-27";
     char* startTime = "09:00";
-    char* endTime = "11:00"; 
+    char* endTime = "11:00";
     char* teamName = "Team_A";
     char* projectName =  "Project A";
     char staffName[8][15] = {"Alan", "Billy", "Cathy", "David", "Eva", "Fanny", "Gary", "Helen"};
@@ -572,10 +572,10 @@ void print_schedule(struct Project project[], struct Staff staff[], char* algori
     char filename;
     if (fp == NULL) {
         fprintf(stderr, "Failed to open the file of name : %s", filename);
-    return EXIT_FAILURE;
+//        return EXIT_FAILURE;
     }
     fp = fopen("Schedule_FCFS_01.txt","w+"); //Example
-    // fp = fopen(filename,"w+"); 
+    // fp = fopen(filename,"w+");
     fprintf(fp,"*** Project Meeting *** \n\n");
     fprintf(fp,"Algorithm used: %s \n",algorithmA);
     fprintf(fp,"Period: %s to %s \n\n",startDate,endDate);
