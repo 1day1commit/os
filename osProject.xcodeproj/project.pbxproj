@@ -28,6 +28,7 @@
 		C15C994E27EEE28800DD8449 /* PLS_update.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = PLS_update.c; sourceTree = "<group>"; };
 		C15C995127EEEC0C00DD8449 /* comment */ = {isa = PBXFileReference; lastKnownFileType = text; path = comment; sourceTree = "<group>"; };
 		C15C995427EF0A1A00DD8449 /* G22_PMS.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = G22_PMS.c; sourceTree = "<group>"; };
+		C1CA3F9E27F8D34900C390B7 /* request.dat */ = {isa = PBXFileReference; lastKnownFileType = text; path = request.dat; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,6 +64,7 @@
 				C15C994E27EEE28800DD8449 /* PLS_update.c */,
 				C15C995127EEEC0C00DD8449 /* comment */,
 				C15C995427EF0A1A00DD8449 /* G22_PMS.c */,
+				C1CA3F9E27F8D34900C390B7 /* request.dat */,
 			);
 			path = osProject;
 			sourceTree = "<group>";
