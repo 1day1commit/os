@@ -179,10 +179,10 @@ int main() {
         char option[2];
         char command[100];
         int len;
-        for (i = 0; i < 13; i++) {
-            close(toChild[i][0]);
-            close(toParent[i][1]);
-        }
+        // for (i = 0; i < 13; i++) {
+        //     close(toChild[i][0]);
+        //     close(toParent[i][1]);
+        // }
         while (true) {
             printf("    ~~ WELCOME TO PolyStar ~~\n\n");
             printf("1.   Create Project Team\n\n");
@@ -301,7 +301,7 @@ void create_project_team(int fd[13][2], char* command, int len) {
         }
     }
     write(fd[useful_inf[1] - 'A' + 8][1], to_project_message, strlen(to_project_message));
-    printf("\n>>>>>> Project Team %c is creaded\n", res[0][5]);
+    printf("\n>>>>>> Project Team %c is created\n", res[0][5]);
 }
 
 int single_input_meeting_request(int fd[13][2], char useful_inf[30]) {
@@ -362,8 +362,23 @@ void FCFS(int fd[13][2]) {
     return;
 }
 void SJF(int fd[13][2]) {
+
+    // 1. read input file
+
+    //2. read project info
+
+    // 
+
+
+
+
     return;
 }
+
+
+
+
+
 void analyse_attendance(int fd[13][2]) {
     return;
 }
