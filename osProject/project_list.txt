@@ -1,0 +1,10 @@
+Team_A Project_A Alan Cathy Fanny Helen
+Team_B Project_B Billy Alan Eva Gary
+Team_C Project_C Cathy Alan David Eva
+Team_D Project_D David Alan Cathy Billy
+Team_E Project_E Eva Billy David Helen
+
+
+        Alan        Billy       Cathy       David        Eva        Fanny       Gary        Helen
+Manager A            B           C           D            E
+Staff  B, C, D      D, E        A, D        C, E        B, C           A             B         A, E
