@@ -1,3 +1,11 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <stdlib.h>
+
 
 char name[8][100] = {"Alan", "Billy", "Cathy", "David", "Eva", "Fanny", "Gary", "Helen"};
 typedef struct Projectss {
@@ -83,17 +91,111 @@ void SJF(int fd[13][2]) {
             token = strtok(NULL, " ");
         }
         // record the end time
-        char endTime[4];
+        char endTime[3];
         end = start + duration;
-        
-        
-        //meeting_data[idx][4][strcspn(meeting_data[idx][4], "\n")] = '\0';
-        // meeting_data[idx][4][strlen(meeting_data[idx][4])-1] = '\0';
-        // endTime[strlen(endTime)-1] = '\0';
-        strcpy(meeting_data[idx][4], endTime);
+        sprintf(endTime, "%d", end);
+        strcpy(meeting_data[idx][4], endTime);        
         idx++;
+
     }
+    //free(token);
     fclose(fp);
+
+    // strip
+    for (i = 0; i<idx-1; i++){
+        meeting_data[i][3][strlen(meeting_data[i][3])-1] = '\0';
+    }
+
+    
+    /**
+     * sort based on the date
+     */
+    char temp[1024]; int day=0;
+    for (i = 0; i<idx; i++){
+        for (j = i+1; j<idx; j++){
+            if (strcmp(meeting_data[i][0], meeting_data[j][0]) > 0){
+                // then swap
+                for (int k = 0; k<5; k++){
+                    strcpy(temp, meeting_data[i][k]);
+                    strcpy(meeting_data[i][k], meeting_data[j][k]);
+                    strcpy(meeting_data[j][k], temp);
+                }
+                day++;
+            }           
+        }
+    }
+
+    /**
+     * sort based on the start time
+     */
+    memset(temp, 0, sizeof(temp));
+    for (i = 0; i<idx; i++){
+        for (j = i+1; j<idx; j++){
+            // should be from same day
+            if (strcmp(meeting_data[i][0], meeting_data[j][0]) == 0){
+                if (strcmp(meeting_data[i][2], meeting_data[j][2]) > 0){
+                    // then swap
+
+                    for (int k = 0; k<5; k++){
+                        strcpy(temp, meeting_data[i][k]);
+                        strcpy(meeting_data[i][k], meeting_data[j][k]);
+                        strcpy(meeting_data[j][k], temp);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * sort based on duration?
+     */
+    memset(temp, 0, sizeof(temp));
+    for (i = 0; i<idx; i++){
+        for (j = i+1; j<idx; j++){
+            // should be from same day
+            if (strcmp(meeting_data[i][0], meeting_data[j][0]) == 0){
+                if (strcmp(meeting_data[i][2], meeting_data[j][2]) == 0){
+                    if (strcmp(meeting_data[i][3], meeting_data[j][3]) > 0){
+                        // then swap
+
+                        for (int k = 0; k<5; k++){
+                            strcpy(temp, meeting_data[i][k]);
+                            strcpy(meeting_data[i][k], meeting_data[j][k]);
+                            strcpy(meeting_data[j][k], temp);
+                        }    
+                    }
+                    
+                }
+            }
+        }
+    }
+
+    /**
+     * sort based on name
+     */
+
+    memset(temp, 0, sizeof(temp));
+    for (i = 0; i<idx; i++){
+        for (j = i+1; j<idx; j++){
+            // should be from same day
+            if (strcmp(meeting_data[i][0], meeting_data[j][0]) == 0){
+                if (strcmp(meeting_data[i][2], meeting_data[j][2]) == 0){
+                    if (strcmp(meeting_data[i][3], meeting_data[j][3]) == 0){
+                         if (strcmp(meeting_data[i][1], meeting_data[j][1]) > 0){
+                            // then swap
+                            for (int k = 0; k<5; k++){
+                                strcpy(temp, meeting_data[i][k]);
+                                strcpy(meeting_data[i][k], meeting_data[j][k]);
+                                strcpy(meeting_data[j][k], temp);
+                            }    
+                         }
+                    }
+                    
+                }
+            }
+        }
+    }
+
     // print
     for(i = 0; i<idx; i++){
         for (j = 0; j<5; j++){
@@ -101,9 +203,68 @@ void SJF(int fd[13][2]) {
         }printf("\n");
     }
 
+    char timeSlot[18][9] = {'0', };
+    for (i = 0; i<18; i++){
+        for (j = 0; j<9; j++){
+            timeSlot[i][j] = '0';
+            //printf("%c ", timeSlot[i][j]);
+        }
+        //printf("\n");
+    }
 
-    
-    printf("done\n");
+
+    // run SJF
+    int pos = 0; int endTime = 0; int begin = 0;
+    begin = atoi(meeting_data[0][2]);
+    for (i = 0; i<idx; i++){
+        if (i != idx -1){
+            if (strcmp(meeting_data[i-1][0], meeting_data[i][0]) != 0){
+                printf("\n\nnew day!\n");
+                endTime = 0;
+                pos++;
+                printf("pos %d\n", pos);
+            }
+        }
+
+        int startTime = atoi(meeting_data[i][2]);
+        printf("start time %d endtime %d\n", startTime, endTime);
+        if (endTime > startTime){
+            printf("\trejected\n");
+        }
+        else{
+            
+            printf("%d \n", atoi(meeting_data[i][3]));
+            for (j= 0; j < atoi(meeting_data[i][3]); j++){
+                printf("recorded %s on %d\n", meeting_data[i][1], startTime+j);
+                
+                if (timeSlot[pos][startTime-9+j] != '0') break;
+                //printf("%c \n", meeting_data[i][1][5]);
+                printf("slot %d\n", startTime-9+j);
+                timeSlot[pos][startTime-9+j] = meeting_data[i][1][5];
+            }
+            endTime = atoi(meeting_data[i][4]);
+            printf("meeting finished at %d\n", endTime);
+        }
+        
+    }
+
+    for (i = 0; i<18; i++){
+        for (j = 0; j<9; j++){
+            printf("%c ", timeSlot[i][j]);
+        }
+        printf("\n");
+    }
+
+
+
+
 
     return;
+}
+
+int main(){
+    int fd[13][2];
+    SJF(fd);
+
+    return 0;
 }
