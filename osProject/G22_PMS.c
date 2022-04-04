@@ -283,7 +283,7 @@ void create_project_team(int fd[13][2], char* command, int len) {
     char to_manager_message[10];
     char to_project_message[10];
     char temp[5];
-    char mananger_message[2] = "MM";
+    char mananger_message[3] = "MM";
     strcpy(to_member_message, create_pro_team);
     strcpy(to_manager_message, create_pro_team);
     strcpy(to_project_message, create_pro_team);
@@ -295,12 +295,12 @@ void create_project_team(int fd[13][2], char* command, int len) {
     strcat(to_project_message, temp);
     for (i = 2; i < useful_inf_len; i++) {
         if (i == 2) {
-            write(fd[useful_inf[i] - 'A'], to_manager_message, strlen(to_manager_message));
+            write(fd[useful_inf[i] - 'A'][1], to_manager_message, strlen(to_manager_message));
         } else {
-            write(fd[useful_inf[i] - 'A'], to_member_message, strlen(to_member_message));
+            write(fd[useful_inf[i] - 'A'][1], to_member_message, strlen(to_member_message));
         }
     }
-    write(fd[useful_inf[1] - 'A' + 8], to_project_message, strlen(to_project_message));
+    write(fd[useful_inf[1] - 'A' + 8][1], to_project_message, strlen(to_project_message));
     printf("\n>>>>>> Project Team %c is creaded\n", res[0][5]);
 }
 
