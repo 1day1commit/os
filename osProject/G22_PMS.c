@@ -177,9 +177,14 @@ int main() {
                     if (strcmp(operation, exit_PMS) == 0) {
                         break;
                     }
+                    
                 }
+                
+            
             }
+            
         }
+        
     }
 
 
@@ -206,10 +211,12 @@ int main() {
                     len = strlen(command);
                     command[--len] = 0;
                     if (strncmp(command, "0", 1) == 0) {
+                        test_cp_func(staff, project);
+                        printf("\n\n\n");
                         break;
+                        
                     } else {
                         create_project_team(toChild, command, len);
-                        test_cp_func(staff, project);
                     }
                 }
 
