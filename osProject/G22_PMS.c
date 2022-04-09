@@ -1,30 +1,29 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdbool.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <stdlib.h>
-#include <fcntl.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 #define CHILD_NUMBER 13
 #define MAX_LINE 162
 #define MAX_REQUEST 999
 
-
-struct Staff
-{
+struct Staff {
     int Project[5];
-    int Manger;
+    int Manager;
     int Team[5];
     int attend_team_number;
 };
 
-struct Project
-{
+
+struct Project {
     int Member[4];
     int Staff_number;
 };
+
 
 char create_pro_team[3] = {'c', 'p', 0};
 char project_meeting_book[3] = {'p', 'b', 0};
@@ -32,8 +31,6 @@ char meeting_attend[3] = {'m', 'a', 0};
 char fcfs[3] = {'f', 'f', 0};
 char sjf[3] = {'s', 'j', 0};
 char exit_PMS[3] = {'e', 'x', 0};
-
-
 
 
 int extract_int(char *s, int start, int len);
@@ -44,21 +41,21 @@ bool is_valid_time(char *s1);
 int day(char *s1, char *s2);
 char *IntToString(int num, char *str);
 char *IntToDay(char *startDate, int start, int num);
-char** split(char *str, char *delimiter);
+char **split(char *str, char *delimiter);
 
 
-
-void create_project_team(int fd[13][2], char* command, int len);
-int single_input_meeting_request(int fd[13][2], char* useful_inf);
-int batch_input_meeting_request(int fd[13][2], char* useful_inf);
+void create_project_team(int fd[13][2], char *command, int len);
+void test_cp_func(struct Staff *stuff, struct Project *project);
+int single_input_meeting_request(int fd[13][2], char *useful_inf);
+int batch_input_meeting_request(int fd[13][2], char *useful_inf);
 void meeting_attendance_request(int fd[13][2]);
 void FCFS(int fd[13][2]);
 void SJF(int fd[13][2]);
-void print_schedule(struct Project project[], struct Staff staff[], char* algorithm);
+void print_schedule(struct Project project[], struct Staff staff[], char *algorithm);
 void analyse_attendance(int fd[13][2]);
 
 
-
+char staffName[8][15] = {"Alan", "Billy", "Cathy", "David", "Eva", "Fanny", "Gary", "Helen"};
 
 
 int main() {
@@ -70,34 +67,45 @@ int main() {
     int toParent[13][2];
     int pid = 0;
     int index = 0;
-    
+
     struct Staff staff[8];
     struct Project project[5];
-    
-    
+
+    int j;
+
     for (i = 0; i < 8; i++) {
         staff[i].attend_team_number = 0;
+        staff[i].Manager = -1;
+        for (j = 0; j < 5; ++j) {
+            staff[i].Project[j] = -1;
+            staff[i].Team[j] = -1;
+        }
     }
-    
+
+
     for (i = 0; i < 5; i++) {
         project[i].Staff_number = 0;
+        for (j = 0; j < 4; ++j) {
+            project[i].Member[j] = -1;
+        }
     }
-    
+
+
     for (i = 0; i < 13; i++) {
         if (pipe(toChild[i]) < 0) {
             printf("Pipe creation error\n");
             exit(1);
         }
     }
-    
+
     for (i = 0; i < 13; i++) {
         if (pipe(toParent[i]) < 0) {
             printf("Pipe creation error\n");
             exit(1);
         }
     }
-    
-    
+
+
     for (i = 1; i <= CHILD_NUMBER; i++) {
         pid = fork();
         if (pid == 0 || pid < 0) {
@@ -107,13 +115,13 @@ int main() {
             }
         }
     }
-    
+
     if (pid < 0) {
         printf("Fork Failed\n");
         exit(1);
     }
-    
-    else if (pid == 0){
+
+    else if (pid == 0) {
         for (i = 0; i < CHILD_NUMBER; i++) {
             if (i == index) {
                 close(toParent[i][0]);
@@ -127,34 +135,35 @@ int main() {
         }
         char buf[100];
         int num;
-        
+
         char operation[3];
         char information[8];
+
         while (true) {
             if ((num = read(toChild[index][0], buf, 10)) > 0) {
                 operation[0] = buf[0];
                 operation[1] = buf[1];
                 operation[2] = 0;
                 strncpy(information, buf + 2, 6);
-                
-                if (index < 8) {
+                printf("%d Information: %s\n", index, information);
+                if (index < 8) {// Staff
                     if (strcmp(operation, create_pro_team) == 0) {
-                        if (strlen(information) == 2) {
+                        if (strlen(information) == 2) {// member
                             staff[index].Project[staff[index].attend_team_number] = information[1] - 'A';
                             staff[index].Team[staff[index].attend_team_number] = information[0] - 'A';
                             staff[index].attend_team_number++;
                         }
-                        if (strlen(information) == 4) {
+                        if (strlen(information) == 4) {// manager
                             staff[index].Project[staff[index].attend_team_number] = information[1] - 'A';
                             staff[index].Team[staff[index].attend_team_number] = information[0] - 'A';
                             staff[index].attend_team_number++;
-                            staff[index].Manger = information[0] - 'A';
+                            staff[index].Manager = information[0] - 'A';
                         }
                     }
                     if (strcmp(operation, exit_PMS) == 0) {
                         break;
                     }
-                } else {
+                } else {// Projects-Teams
                     if (strcmp(operation, create_pro_team) == 0) {
                         int staff_number = strlen(information);
                         i = 0;
@@ -169,20 +178,18 @@ int main() {
                         break;
                     }
                 }
-                
             }
         }
-        
     }
+
+
     if (pid > 0) {
         char buf[100];
         char option[2];
         char command[100];
         int len;
-        for (i = 0; i < 13; i++) {
-            close(toChild[i][0]);
-            close(toParent[i][1]);
-        }
+
+
         while (true) {
             printf("    ~~ WELCOME TO PolyStar ~~\n\n");
             printf("1.   Create Project Team\n\n");
@@ -202,11 +209,11 @@ int main() {
                         break;
                     } else {
                         create_project_team(toChild, command, len);
+                        test_cp_func(staff, project);
                     }
                 }
 
-            }
-            else if (strncmp(option, "2", 1) == 0) {
+            } else if (strncmp(option, "2", 1) == 0) {
                 while (true) {
                     printf("\nEnter> ");
                     fgets(command, 100, stdin);
@@ -226,14 +233,13 @@ int main() {
                         int record_num = 0;
                         record_num = batch_input_meeting_request(toChild, useful_inf);
                         printf(">>>>>>%d meeting requests have been recorded\n", record_num);
-                    } else if (strncmp(command, "0", 1) == 0){
+                    } else if (strncmp(command, "0", 1) == 0) {
                         break;
                     } else {
                         meeting_attendance_request(toChild);
                     }
                 }
-            }
-            else if (strncmp(option, "3", 1) == 0) {
+            } else if (strncmp(option, "3", 1) == 0) {
                 while (true) {
                     fgets(command, 100, stdin);
                     if (strncmp(command, "For 3a", 6) == 0) {
@@ -244,8 +250,7 @@ int main() {
                         analyse_attendance(toChild);
                     }
                 }
-            }
-            else if (strncmp(option, "4", 1) == 0) {
+            } else if (strncmp(option, "4", 1) == 0) {
                 for (i = 0; i < 13; i++) {
                     char temp[5];
                     strcpy(temp, exit_PMS);
@@ -254,19 +259,20 @@ int main() {
                 for (i = 1; i <= CHILD_NUMBER; i++) {
                     wait(NULL);
                 }
+
+
                 break;
-            }
-            else {
-                printf("\nThe comment is illegal. Please reenter the comment.\n");
+            } else {
+                printf("\nThe comment is illegal. Please re-enter the comment.\n");
             }
         }
     }
     return 0;
 }
 
-void create_project_team(int fd[13][2], char* command, int len) {
+void create_project_team(int fd[13][2], char *command, int len) {
     char useful_inf[6];
-    char** res = split(command, " ");
+    char **res = split(command, " ");
     int i = 0;
     while (res[i] != NULL) {
         if (i == 0) {
@@ -283,15 +289,15 @@ void create_project_team(int fd[13][2], char* command, int len) {
     char to_manager_message[10];
     char to_project_message[10];
     char temp[5];
-    char mananger_message[3] = "MM";
+    char manager_message[3] = "MM";
     strcpy(to_member_message, create_pro_team);
     strcpy(to_manager_message, create_pro_team);
     strcpy(to_project_message, create_pro_team);
     strncpy(temp, useful_inf, 2);
     strcat(to_member_message, temp);
     strcat(to_manager_message, temp);
-    strcat(to_manager_message, mananger_message);
-    strncpy(temp, useful_inf + 2, 4);
+    strcat(to_manager_message, manager_message);
+    strncpy(temp, useful_inf + 2, i - 2);
     strcat(to_project_message, temp);
     for (i = 2; i < useful_inf_len; i++) {
         if (i == 2) {
@@ -301,7 +307,8 @@ void create_project_team(int fd[13][2], char* command, int len) {
         }
     }
     write(fd[useful_inf[1] - 'A' + 8][1], to_project_message, strlen(to_project_message));
-    printf("\n>>>>>> Project Team %c is creaded\n", res[0][5]);
+    sleep(1);
+    printf("\n>>>>>> Project Team %c is created.\n", res[0][5]);
 }
 
 int single_input_meeting_request(int fd[13][2], char useful_inf[30]) {
@@ -326,7 +333,7 @@ int single_input_meeting_request(int fd[13][2], char useful_inf[30]) {
 }
 
 
-int batch_input_meeting_request(int fd[13][2], char* command) {
+int batch_input_meeting_request(int fd[13][2], char *command) {
     printf("command : %s\n", command);
     char useful_inf[30];
     char toInputFile[30];
@@ -341,7 +348,7 @@ int batch_input_meeting_request(int fd[13][2], char* command) {
         printf("fail to read the file\n");
         return -1;
     }
-    
+
     while (fgets(buf, MAX_LINE, fp) != NULL) {
         len = strlen(buf);
         buf[len - 1] = '\0';
@@ -369,8 +376,6 @@ void analyse_attendance(int fd[13][2]) {
 }
 
 
-
-
 int extract_int(char *s, int start, int len) {
     char ss[5];
     strncpy(ss, s + start, len);
@@ -388,12 +393,13 @@ int year(int yr) {
 
 
 int month(int yr, int mth) {
-    int days[13] = { 0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+    int days[13] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
     if (mth != 2)
         return days[mth];
     else
         return days[mth] + year(yr);
 }
+
 
 bool is_valid_day(char *s1) {
     int yr, mth, dy;
@@ -415,9 +421,10 @@ bool is_valid_day(char *s1) {
     return true;
 }
 
+
 bool is_valid_time(char *s1) {
     int time;
-    time =extract_int(s1, 0, 2);
+    time = extract_int(s1, 0, 2);
     if (time < 9 || time > 18) {
         return false;
     }
@@ -454,8 +461,7 @@ int day(char *s1, char *s2) {
     if (yr1 == yr2) {
         for (i = mth1; i < mth2; i++)
             d_mth = d_mth + month(yr1, i);
-    }
-    else {
+    } else {
         for (i = mth1; i <= 12; i++) {
             d_mth = d_mth + month(yr1, i);
         }
@@ -466,13 +472,11 @@ int day(char *s1, char *s2) {
 
     if (yr1 == yr2 && mth1 == mth2) {
         d_dy = dy2 - dy1 + 1;
-    }
-    else {
+    } else {
         d_dy = -dy1 + 1 + dy2;
     }
 
     return d_yr + d_mth + d_dy;
-
 }
 
 
@@ -499,16 +503,22 @@ char *IntToString(int num, char *str) {
 char *IntToDay(char *startDate, int start, int num) {
     char FIRST_DAY[11] = "xxxx-01-01";
     char year[4];
-    int  YEAR, days = 365, i = 0, thisDate, j;
-    int  month[12] = { 31,28,31,30,31,30,31,31,30,31,30,31 };
-    char mon[12][2] = { "01","02","03","04","05","06","07","08","09","10","11","12" };
-    char day[31][2] = { "01","02","03","04","05","06","07","08","09","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31" };
-    for (j = 0; j < 4; j++) { FIRST_DAY[j] = startDate[j]; year[j] = startDate[j]; }
+    int YEAR, days = 365, i = 0, thisDate, j;
+    int month[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    char mon[12][3] = {"01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"};
+    char day[31][3] = {"01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"};
+    for (j = 0; j < 4; j++) {
+        FIRST_DAY[j] = startDate[j];
+        year[j] = startDate[j];
+    }
     YEAR = atoi(year);
     if (start == -1) printf("The date is illegal. Please reenter the comment.\n");
     else {
         thisDate = start + num;
-        if (YEAR % 4 == 0) { days += 1; month[1] = 29; }
+        if (YEAR % 4 == 0) {
+            days += 1;
+            month[1] = 29;
+        }
         if (start + num <= days) {
             i = 0;
             while (thisDate > month[i]) {
@@ -517,17 +527,16 @@ char *IntToDay(char *startDate, int start, int num) {
             }
             for (j = 0; j < 2; j++) startDate[j + 5] = mon[i][j];
             for (j = 0; j < 2; j++) startDate[j + 8] = day[thisDate - 1][j];
-        }
-        else {
+        } else {
             printf("The date is illegal. Please reenter the comment.\n");
         }
     }
     return startDate;
 }
 
-char** split(char *str, char *delimiter) {
+char **split(char *str, char *delimiter) {
     int len = strlen(str);
-    char *strCopy = (char*)malloc((len + 1) * sizeof(char));
+    char *strCopy = (char *) malloc((len + 1) * sizeof(char));
     strcpy(strCopy, str);
     int i, j;
     for (i = 0; strCopy[i] != '\0'; i++) {
@@ -538,7 +547,7 @@ char** split(char *str, char *delimiter) {
             }
         }
     }
-    char** res = (char**)malloc((len + 2) * sizeof(char*));
+    char **res = (char **) malloc((len + 2) * sizeof(char *));
     len++;
     int resI = 0;
     for (i = 0; i < len; i++) {
@@ -550,48 +559,50 @@ char** split(char *str, char *delimiter) {
     res[resI] = NULL;
     return res;
 }
-void print_schedule(struct Project project[], struct Staff staff[], char* algorithm){
-    int i,j;
+
+
+void print_schedule(struct Project project[], struct Staff staff[], char *algorithm) {
+    int i, j;
     int accepted_meeting = 0;
     int rejected_meeting = 0;
     int total_meeting = 0;
-    char StartDate[MAX_REQUEST][20]={0};
-    char EndDate[MAX_REQUEST][20]={0};
+    char StartDate[MAX_REQUEST][20] = {0};
+    char EndDate[MAX_REQUEST][20] = {0};
     //===========FOR TESTING ONLY===========
-    char* algorithmA = "FCFS";
-    char* startDate = "2022-04-25";
-    char* endDate = "2022-04-27";
-    char* startTime = "09:00";
-    char* endTime = "11:00";
-    char* teamName = "Team_A";
-    char* projectName =  "Project A";
-    char staffName[8][15] = {"Alan", "Billy", "Cathy", "David", "Eva", "Fanny", "Gary", "Helen"};
-    char* blank="";
+    char *algorithmA = "FCFS";
+    char *startDate = "2022-04-25";
+    char *endDate = "2022-04-27";
+    char *startTime = "09:00";
+    char *endTime = "11:00";
+    char *teamName = "Team_A";
+    char *projectName = "Project A";
+    //staffName[8][15] = {"Alan", "Billy", "Cathy", "David", "Eva", "Fanny", "Gary", "Helen"};
+    char *blank = "";
     //===========FOR TESTING ONLY===========
     FILE *fp;
     char filename;
     if (fp == NULL) {
         fprintf(stderr, "Failed to open the file of name : %s", filename);
-//        return EXIT_FAILURE;
+        //        return EXIT_FAILURE;
     }
-    fp = fopen("Schedule_FCFS_01.txt","w+"); //Example
+    fp = fopen("Schedule_FCFS_01.txt", "w+");//Example
     // fp = fopen(filename,"w+");
-    fprintf(fp,"*** Project Meeting *** \n\n");
-    fprintf(fp,"Algorithm used: %s \n",algorithmA);
-    fprintf(fp,"Period: %s to %s \n\n",startDate,endDate);
-    fprintf(fp,"Date             Start    End       Team         Project           \n");
-    fprintf(fp,"====================================================================================== \n");
-    fprintf(fp,"%s %11s %8s %10s %15s\n\n", startDate, startTime, endTime, teamName, projectName);
-    for (i=0;i<8;i++){
-        fprintf(fp,"====================================================================================== \n");
-        fprintf(fp,"Staff: %s \n\n",staffName[i]);
-        fprintf(fp,"Date             Start    End       Team         Project           \n");
-        fprintf(fp,"====================================================================================== \n");
-        fprintf(fp,"%s %11s %8s %10s %15s\n\n", startDate, startTime, endTime, teamName, projectName);
+    fprintf(fp, "*** Project Meeting *** \n\n");
+    fprintf(fp, "Algorithm used: %s \n", algorithmA);
+    fprintf(fp, "Period: %s to %s \n\n", startDate, endDate);
+    fprintf(fp, "Date             Start    End       Team         Project           \n");
+    fprintf(fp, "====================================================================================== \n");
+    fprintf(fp, "%s %11s %8s %10s %15s\n\n", startDate, startTime, endTime, teamName, projectName);
+    for (i = 0; i < 8; i++) {
+        fprintf(fp, "====================================================================================== \n");
+        fprintf(fp, "Staff: %s \n\n", staffName[i]);
+        fprintf(fp, "Date             Start    End       Team         Project           \n");
+        fprintf(fp, "====================================================================================== \n");
+        fprintf(fp, "%s %11s %8s %10s %15s\n\n", startDate, startTime, endTime, teamName, projectName);
 
-        fprintf(fp,"====================================================================================== \n");
+        fprintf(fp, "====================================================================================== \n");
     }
-    fprintf(fp,"fp,%36s - End - %36s\n",blank,blank);
+    fprintf(fp, "fp,%36s - End - %36s\n", blank, blank);
 
     //===========FOR LAYOUT TESTING ONLY===========
     float total_utilization = 99.9;
@@ -600,19 +611,45 @@ void print_schedule(struct Project project[], struct Staff staff[], char* algori
     int accepted_requests = 999;
     int rejected_requests = 999;
     int total_requests = 999;
-    char* blanks = "";
+    char *blanks = "";
     //===========FOR LAYOUT TESTING ONLYdd===========
-    fprintf(fp,"Performance: \n\n");
-    fprintf(fp,"Total Number of Requests Received: %d (%.1f%%)\n", total_requests,total_utilization );
-    fprintf(fp,"%5s Number of Requests Received: %d (%.1f%%)\n", blanks, accepted_requests, accepted_utilization);
-    fprintf(fp,"%5s Number of Requests Rejected: %d (%.1f%%)\n\n", blanks, rejected_requests, rejected_utilization);
-    fprintf(fp,"Utilization of Time Slot: \n\n");
-    fprintf(fp,"%4s Accepted request %10s - %.1f%%\n", blanks, blanks, accepted_utilization);
-    fprintf(fp,"%4s Team_A %20s - %.1f%%\n", blanks, blanks, accepted_utilization);
-    fprintf(fp,"%4s Team_B %20s - %.1f%%\n", blanks, blanks, accepted_utilization);
-    fprintf(fp,"%4s Staff_A %19s - %.1f%%\n", blanks, blanks, accepted_utilization);
-    fprintf(fp,"%4s Staff_B %19s - %.1f%%\n", blanks, blanks, accepted_utilization);
+    fprintf(fp, "Performance: \n\n");
+    fprintf(fp, "Total Number of Requests Received: %d (%.1f%%)\n", total_requests, total_utilization);
+    fprintf(fp, "%5s Number of Requests Received: %d (%.1f%%)\n", blanks, accepted_requests, accepted_utilization);
+    fprintf(fp, "%5s Number of Requests Rejected: %d (%.1f%%)\n\n", blanks, rejected_requests, rejected_utilization);
+    fprintf(fp, "Utilization of Time Slot: \n\n");
+    fprintf(fp, "%4s Accepted request %10s - %.1f%%\n", blanks, blanks, accepted_utilization);
+    fprintf(fp, "%4s Team_A %20s - %.1f%%\n", blanks, blanks, accepted_utilization);
+    fprintf(fp, "%4s Team_B %20s - %.1f%%\n", blanks, blanks, accepted_utilization);
+    fprintf(fp, "%4s Staff_A %19s - %.1f%%\n", blanks, blanks, accepted_utilization);
+    fprintf(fp, "%4s Staff_B %19s - %.1f%%\n", blanks, blanks, accepted_utilization);
 
     fclose(fp);
+}
 
+
+void test_cp_func(struct Staff *staff, struct Project *project) {
+    int i, k;
+    sleep(2);
+    printf("\n\n\n");
+    printf("STAFF INFO\n----------\n");
+    for (i = 0; i < 8; ++i) {
+        printf("Staff %d %s is manager of %d\n", i, staffName[i], staff[i].Manager);
+        for (k = 0; k < staff[i].attend_team_number; ++k) {
+            printf("Works on the project: %d\n", staff[i].Project[k]);
+            printf("Works on the team: %d\n", staff[i].Team[k]);
+        }
+        printf("***************\n");
+    }
+
+    printf("\n\n\n");
+
+    printf("PROJECT INFO\n------------\n");
+    for (i = 0; i < 5; ++i) {
+        printf("Project %d\n", i);
+        for (k = 0; k < project[i].Staff_number; ++k) {
+            printf("%d ", project[i].Member[k]);
+        }
+        printf("***************\n");
+    }
 }
