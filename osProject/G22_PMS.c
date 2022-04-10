@@ -569,10 +569,31 @@ char **split(char *str, char *delimiter) {
 
 
 void print_schedule(struct Project project[], struct Staff staff[], char *algorithm) {
+     // Need a struct or array that have total, rejected, accepted meeting requests
+    // ================== something like this ==================
+    struct Total_MeetingRequests{
+        char total_team[MAX_REQUEST][10]; //Team_A, Team_B
+        char total_date[MAX_REQUEST][20]; // 2022-04-25
+        char total_startTime[MAX_REQUEST][20]; // 09:00
+        int total_hours[MAX_REQUEST]; // 2(hours)
+    } total_MeetingRequests;
+    struct Accepted_MeetingRequests{
+        char accepted_team[MAX_REQUEST][10]; 
+        char accepted_date[MAX_REQUEST][20]; 
+        char accepted_startTime[MAX_REQUEST][20]; 
+        int accepted_hours[MAX_REQUEST];
+    } accepted_MeetingRequests;
+    struct Rejected_MeetingRequests{
+        char rejected_team[MAX_REQUEST][10]; 
+        char rejected_date[MAX_REQUEST][20]; 
+        char rejected_startTime[MAX_REQUEST][20]; 
+        int rejected_hours[MAX_REQUEST]; 
+    } rejected_MeetingRequests;
+    //============================================================
     int i, j;
-    int accepted_meeting = 0;
-    int rejected_meeting = 0;
-    int total_meeting = 0;
+    int total_meeting = 15; // accepted + rejected meetings
+    int accepted_meeting = 10; //accepted (scheduled meetings)
+    int rejected_meeting = 5; // rejected (meeting requests)
     char StartDate[MAX_REQUEST][20] = {0};
     char EndDate[MAX_REQUEST][20] = {0};
     //===========FOR TESTING ONLY===========
@@ -583,16 +604,16 @@ void print_schedule(struct Project project[], struct Staff staff[], char *algori
     char *endTime = "11:00";
     char *teamName = "Team_A";
     char *projectName = "Project A";
-    //staffName[8][15] = {"Alan", "Billy", "Cathy", "David", "Eva", "Fanny", "Gary", "Helen"};
+    char staffName[8][15] = {"Alan", "Billy", "Cathy", "David", "Eva", "Fanny", "Gary", "Helen"};
     char *blank = "";
     //===========FOR TESTING ONLY===========
     FILE *fp;
     char filename;
+    fp = fopen("Schedule_FCFS_01.txt", "w+");//Example
     if (fp == NULL) {
         fprintf(stderr, "Failed to open the file of name : %c", filename);
-        //        return EXIT_FAILURE;
+        // return 1;
     }
-    fp = fopen("Schedule_FCFS_01.txt", "w+");//Example
     // fp = fopen(filename,"w+");
     fprintf(fp, "*** Project Meeting *** \n\n");
     fprintf(fp, "Algorithm used: %s \n", algorithmA);
@@ -609,28 +630,36 @@ void print_schedule(struct Project project[], struct Staff staff[], char *algori
 
         fprintf(fp, "====================================================================================== \n");
     }
-    fprintf(fp, "fp,%36s - End - %36s\n", blank, blank);
+    fprintf(fp, "%36s - End - %36s\n", blank, blank);
 
+    fprintf(fp, "Meeting Request - REJECTED *** \n\n");
+    fprintf(fp, "There are %d requests rejected for the required period.\n\n", rejected_meeting);
+    fprintf(fp, "====================================================================================== \n");
+
+    // for( j = 0; j < rejected_meeting; j++){
+    //     fprintf(fp, "%d.  %s  %s  %s  %d", j+1, rejected_MeetingRequests.rejected_team[j], rejected_MeetingRequests.rejected_date[j], rejected_MeetingRequests.rejected_hours[j], rejected_MeetingRequests.rejected_hours[j]);
+    // } 
+
+    fprintf(fp, "====================================================================================== \n");
     //===========FOR LAYOUT TESTING ONLY===========
-    float total_utilization = 99.9;
-    float accepted_utilization = 99.9;
-    float rejected_utilization = 99.9;
-    int accepted_requests = 999;
-    int rejected_requests = 999;
-    int total_requests = 999;
+    int total_Hours;
+    int accepted_Hours;
+    int rejected_Hours;
+    float total_utilization = total_Hours / 162; 
+    float accepted_utilization = accepted_Hours / 162;
+    float rejected_utilization = rejected_Hours / 162;
     char *blanks = "";
     //===========FOR LAYOUT TESTING ONLYdd===========
     fprintf(fp, "Performance: \n\n");
-    fprintf(fp, "Total Number of Requests Received: %d (%.1f%%)\n", total_requests, total_utilization);
-    fprintf(fp, "%5s Number of Requests Received: %d (%.1f%%)\n", blanks, accepted_requests, accepted_utilization);
-    fprintf(fp, "%5s Number of Requests Rejected: %d (%.1f%%)\n\n", blanks, rejected_requests, rejected_utilization);
+    fprintf(fp, "Total Number of Requests Received: %d (%.1f%%)\n", total_meeting, total_utilization);
+    fprintf(fp, "%5s Number of Requests Received: %d (%.1f%%)\n", blanks, accepted_meeting, accepted_utilization);
+    fprintf(fp, "%5s Number of Requests Rejected: %d (%.1f%%)\n\n", blanks, rejected_meeting, rejected_utilization);
     fprintf(fp, "Utilization of Time Slot: \n\n");
     fprintf(fp, "%4s Accepted request %10s - %.1f%%\n", blanks, blanks, accepted_utilization);
     fprintf(fp, "%4s Team_A %20s - %.1f%%\n", blanks, blanks, accepted_utilization);
     fprintf(fp, "%4s Team_B %20s - %.1f%%\n", blanks, blanks, accepted_utilization);
     fprintf(fp, "%4s Staff_A %19s - %.1f%%\n", blanks, blanks, accepted_utilization);
     fprintf(fp, "%4s Staff_B %19s - %.1f%%\n", blanks, blanks, accepted_utilization);
-
     fclose(fp);
 }
 
