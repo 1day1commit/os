@@ -46,6 +46,19 @@ if the date is illegal, return -1
 "char** split(char *str, char *delimiter);"
 same to python split function
 
+Test command:
+
+Team_A Project_A Alan Cathy Fanny Helen
+
+For 2a, Team_A 2022-04-25 09:00 2
+
+For 2a, Team_A 2022-04-26 09:00 2
+
+For 2b, request.dat
+
+
+
+
 ZhangXinyu 3.27 work commit: added a string segmentation function, modified the overall architecture of the main function, and wrote part of the create_project_team function.
 
 ZhangXinyu 3.28 work commit: write the content of two functions: single_input_meeting_request and batch_input_meeting_request
@@ -58,3 +71,5 @@ ZhangXinyu 4.3 work commit: debug the main function ,single_input_meeting_reques
 >>>>>>> Stashed changes
 
 Gurkan 4.10 work commit: Since the program requires a lot of memory to debug, added a test function for create_project_team function. It prints out the content of the both Project and the Staff structs after creating the teams and entering 0 in the create_project_team.
+
+ZhangXinyu 4.10 work commit: fix a huge bug which is not closed all processes at the end

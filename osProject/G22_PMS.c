@@ -58,47 +58,43 @@ void analyse_attendance(int fd[13][2]);
 char staffName[8][15] = {"Alan", "Billy", "Cathy", "David", "Eva", "Fanny", "Gary", "Helen"};
 
 
+
 int main() {
     FILE *input_file;
     input_file = fopen("Input_Meeting.txt", "w");
     fclose(input_file);
-    int i;
+    int i,j;
     int toChild[13][2];
     int toParent[13][2];
     int pid = 0;
     int index = 0;
-
     struct Staff staff[8];
     struct Project project[5];
-
-    int j;
-
-    for (i = 0; i < 8; i++) {
+    
+    for (i = 0; i < CHILD_NUMBER; i++) {
         staff[i].attend_team_number = 0;
         staff[i].Manager = -1;
-        for (j = 0; j < 5; ++j) {
+        for (j = 0; j < 5; j++) {
             staff[i].Project[j] = -1;
-            staff[i].Team[j] = -1;
         }
     }
-
-
-    for (i = 0; i < 5; i++) {
+    
+    for (i = 0; i < CHILD_NUMBER; i++) {
         project[i].Staff_number = 0;
-        for (j = 0; j < 4; ++j) {
+        for (j = 0; j < 4; j++) {
             project[i].Member[j] = -1;
         }
     }
+    
 
-
-    for (i = 0; i < 13; i++) {
+    for (i = 0; i < CHILD_NUMBER; i++) {
         if (pipe(toChild[i]) < 0) {
             printf("Pipe creation error\n");
             exit(1);
         }
     }
 
-    for (i = 0; i < 13; i++) {
+    for (i = 0; i < CHILD_NUMBER; i++) {
         if (pipe(toParent[i]) < 0) {
             printf("Pipe creation error\n");
             exit(1);
@@ -106,7 +102,7 @@ int main() {
     }
 
 
-    for (i = 1; i <= CHILD_NUMBER; i++) {
+    for (i = 0; i < CHILD_NUMBER; i++) {
         pid = fork();
         if (pid == 0 || pid < 0) {
             if (pid == 0) {
@@ -133,6 +129,7 @@ int main() {
                 close(toChild[i][1]);
             }
         }
+        
         char buf[100];
         int num;
 
@@ -148,12 +145,15 @@ int main() {
                 printf("%d Information: %s\n", index, information);
                 if (index < 8) {// Staff
                     if (strcmp(operation, create_pro_team) == 0) {
-                        if (strlen(information) == 2) {// member
+                        printf("The information length %lu\n", strlen(information));
+                        if (strlen(information) <= 3) {// member
+                            printf("Add member\n");
                             staff[index].Project[staff[index].attend_team_number] = information[1] - 'A';
                             staff[index].Team[staff[index].attend_team_number] = information[0] - 'A';
                             staff[index].attend_team_number++;
                         }
-                        if (strlen(information) == 4) {// manager
+                        if (strlen(information) > 3) {// manager
+                            printf("Add manager\n");
                             staff[index].Project[staff[index].attend_team_number] = information[1] - 'A';
                             staff[index].Team[staff[index].attend_team_number] = information[0] - 'A';
                             staff[index].attend_team_number++;
@@ -177,14 +177,11 @@ int main() {
                     if (strcmp(operation, exit_PMS) == 0) {
                         break;
                     }
-                    
                 }
-                
-            
             }
-            
         }
-        
+        close(toChild[index][0]);
+        close(toParent[index][1]);
     }
 
 
@@ -193,8 +190,6 @@ int main() {
         char option[2];
         char command[100];
         int len;
-
-
         while (true) {
             printf("    ~~ WELCOME TO PolyStar ~~\n\n");
             printf("1.   Create Project Team\n\n");
@@ -263,16 +258,21 @@ int main() {
                     strcpy(temp, exit_PMS);
                     write(toChild[i][1], temp, strlen(temp));
                 }
-                for (i = 1; i <= CHILD_NUMBER; i++) {
-                    wait(NULL);
-                }
-
-
                 break;
             } else {
                 printf("\nThe comment is illegal. Please re-enter the comment.\n");
             }
         }
+        for(i=0; i<CHILD_NUMBER; i++){
+            close(toChild[i][1]);
+            close(toChild[i][0]);
+            close(toParent[i][0]);
+            close(toParent[i][1]);
+        }
+        for (i = 1; i <= CHILD_NUMBER; i++) {
+            wait(NULL);
+        }
+        exit(0);
     }
     return 0;
 }
@@ -334,7 +334,7 @@ int single_input_meeting_request(int fd[13][2], char useful_inf[30]) {
         printf("It is invalid time\n");
         return -1;
     }
-    fprintf(input_file, "%s", useful_inf);
+    fprintf(input_file, "%s\n", useful_inf);
     fclose(input_file);
     return 1;
 }
@@ -589,7 +589,7 @@ void print_schedule(struct Project project[], struct Staff staff[], char *algori
     FILE *fp;
     char filename;
     if (fp == NULL) {
-        fprintf(stderr, "Failed to open the file of name : %s", filename);
+        fprintf(stderr, "Failed to open the file of name : %c", filename);
         //        return EXIT_FAILURE;
     }
     fp = fopen("Schedule_FCFS_01.txt", "w+");//Example
