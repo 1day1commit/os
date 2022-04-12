@@ -445,7 +445,7 @@ void FCFS(int fd[13][2], char useful_inf[30]) {
 
     char start_date[12];
     char end_date[12];
-    int len, temp, index1=0, index2=0;    //index1 gives the no of accepted meeting requests and index2 gives the no of rejected meeting requests
+    int len, index1=0, index2=0;    //index1 gives the no of accepted meeting requests and index2 gives the no of rejected meeting requests
     strcpy(start_date, "2022-04-25");  //record the starting date
     strcpy(end_date, "2022-05-14");   //record the end date
     len = strlen(start_date);   
