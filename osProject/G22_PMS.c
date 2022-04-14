@@ -180,7 +180,7 @@ int main() {
                 }
             }
         }
-        close(toChild[index][0]);
+        //close(toChild[index][0]);
         close(toParent[index][1]);
     }
 
@@ -267,7 +267,7 @@ int main() {
         }
         for(i=0; i<CHILD_NUMBER; i++){
             close(toChild[i][1]);
-            close(toChild[i][0]);
+            //close(toChild[i][0]);
             close(toParent[i][0]);
             close(toParent[i][1]);
         }
@@ -278,6 +278,18 @@ int main() {
     }
     return 0;
 }
+
+
+int readPipeManager(int fd[13][2], int managerIndex){
+    char buffer[1024];
+    printf("mi %d\n", managerIndex);
+    read(fd[managerIndex][0], buffer, sizeof(buffer));
+    printf("buffer %s\n", buffer);        
+
+    return 0;
+}
+
+
 
 void create_project_team(int fd[13][2], char *command, int len) {
     char useful_inf[6];
@@ -308,16 +320,42 @@ void create_project_team(int fd[13][2], char *command, int len) {
     strcat(to_manager_message, manager_message);
     strncpy(temp, useful_inf + 2, i - 2);
     strcat(to_project_message, temp);
+
+        // team_a project_b cathy dee eff fds
+        // useful info abcdef"
+        // to manager cpabMM
+        // member message cpab
+        // project message cpcdef
+
+    printf("useful info %s\n", useful_inf); // Team, Project, Manager, Member (initial)
+    printf("to manager %s\n", to_manager_message); // cp, team, project, MM
+    printf("member message %s\n", to_member_message); // cp, team, project
+    printf("project message %s\n", to_project_message); // cp, manager initial, member, member, member
+
+
+
     for (i = 2; i < useful_inf_len; i++) {
         if (i == 2) {
+            char buf[1024];
+            printf("writing pipe manager %d %d\n", i, useful_inf[i]-'A');
+            printf("useful_inf 2 %c\n", useful_inf[2]);
             write(fd[useful_inf[i] - 'A'][1], to_manager_message, strlen(to_manager_message));    //need to add the null character
+            //read(fd[useful_inf[i] - 'A'][0], buf, sizeof(buf));
+            printf("\n----------readPipe---------\n");
+
+            readPipeManager(fd, useful_inf[2]-'A');            
+            
         } else {
+            printf("writing pipe member %d %d\n", i, useful_inf[i]-'A');
             write(fd[useful_inf[i] - 'A'][1], to_member_message, strlen(to_member_message));     //need to add the null character
         }
     }
+    printf("writing pipe project %d\n", useful_inf[1]-'A'+8);
     write(fd[useful_inf[1] - 'A' + 8][1], to_project_message, strlen(to_project_message));
     sleep(1);
     printf("\n>>>>>> Project Team %c is created.\n", res[0][5]);
+
+
 }
 
 int single_input_meeting_request(int fd[13][2], char useful_inf[30]) {
@@ -374,8 +412,6 @@ int batch_input_meeting_request(int fd[13][2], char *command) {
 void meeting_attendance_request(int fd[13][2]) {
     return;
 }
-
-
 
 
 
@@ -594,10 +630,254 @@ void FCFS(int fd[13][2], char useful_inf[30]) {
 
 
 
-
 void SJF(int fd[13][2]) {
+    int i, j;
+
+    /**
+     * Dummy Data
+     */
+    projectss p1, p2, p3, p4, p5;
+    // Team_A Project_A Alan Cathy Fanny Helen
+    strcpy(p1.team_name, "A");
+    strcpy(p1.project_name, "A");
+    strcpy(p1.manager, "A");
+    strcpy(p1.member, "CFH");
+
+    // Team_B Project_B Billy Alan Eva Gary
+    strcpy(p2.team_name,"B");
+    strcpy(p2.project_name, "B");
+    strcpy(p2.manager, "B");
+    strcpy(p2.member, "AEG");
+
+    // Team_C Project_C Cathy Alan David Eva
+    strcpy(p3.team_name,"C");
+    strcpy(p3.project_name, "C");
+    strcpy(p3.manager, "C");
+    strcpy(p3.member, "ADE");
+
+    // Team_D Project_D David Alan Cathy Billy
+    strcpy(p4.team_name,"D");
+    strcpy(p4.project_name, "D");
+    strcpy(p4.manager, "D");
+    strcpy(p4.member, "ACB");
+
+    // Team_E Project_E Eva Billy David Helen
+    strcpy(p5.team_name,"E");
+    strcpy(p5.project_name, "E");
+    strcpy(p5.manager, "E");
+    strcpy(p5.member, "BDH");
+
+
+    
+    // 1. read input file
+    FILE *fp;
+    fp = fopen("input_meeting2.txt", "r");
+
+    // 2. read project info
+    // Team_A 2022-04-25 09:00 2
+    // 3. store data
+    char meeting_data[162][5][1024];
+    char buffer[1024]; char *token; int idx = 0;
+    while (!feof(fp)){
+        i = 0;
+        fgets(buffer, 1024, fp);
+        token = strtok(buffer, " ");
+        int start = 0; int duration = 0; int end = 0;
+        while (token != NULL){
+            
+            // store date first
+            //meeting_data[idx][i] = (char *)malloc(sizeof(char) * 1024);
+            if (i == 0){ // Team_A
+                strcpy(meeting_data[idx][1], token);
+            }
+            if (i == 1){ //2022-04-25
+                strcpy(meeting_data[idx][0], token);
+            }
+            if (i == 2){ //09:00
+                strcpy(meeting_data[idx][2], token);
+                start = atoi(token);
+            }
+            if (i == 3){ // 2
+                strcpy(meeting_data[idx][3], token);
+                duration = atoi(token);
+            }
+
+            i++;
+            token = strtok(NULL, " ");
+        }
+        // record the end time
+        char endTime[3];
+        end = start + duration;
+        sprintf(endTime, "%d", end);
+        strcpy(meeting_data[idx][4], endTime);        
+        idx++;
+
+    }
+    //free(token);
+    fclose(fp);
+
+    // strip
+    for (i = 0; i<idx-1; i++){
+        meeting_data[i][3][strlen(meeting_data[i][3])-1] = '\0';
+    }
+
+    
+    /**
+     * sort based on the date
+     */
+    char temp[1024]; int day=0;
+    for (i = 0; i<idx; i++){
+        for (j = i+1; j<idx; j++){
+            if (strcmp(meeting_data[i][0], meeting_data[j][0]) > 0){
+                // then swap
+                for (int k = 0; k<5; k++){
+                    strcpy(temp, meeting_data[i][k]);
+                    strcpy(meeting_data[i][k], meeting_data[j][k]);
+                    strcpy(meeting_data[j][k], temp);
+                }
+                day++;
+            }           
+        }
+    }
+
+    /**
+     * sort based on the start time
+     */
+    memset(temp, 0, sizeof(temp));
+    for (i = 0; i<idx; i++){
+        for (j = i+1; j<idx; j++){
+            // should be from same day
+            if (strcmp(meeting_data[i][0], meeting_data[j][0]) == 0){
+                if (strcmp(meeting_data[i][2], meeting_data[j][2]) > 0){
+                    // then swap
+
+                    for (int k = 0; k<5; k++){
+                        strcpy(temp, meeting_data[i][k]);
+                        strcpy(meeting_data[i][k], meeting_data[j][k]);
+                        strcpy(meeting_data[j][k], temp);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * sort based on duration?
+     */
+    memset(temp, 0, sizeof(temp));
+    for (i = 0; i<idx; i++){
+        for (j = i+1; j<idx; j++){
+            // should be from same day
+            if (strcmp(meeting_data[i][0], meeting_data[j][0]) == 0){
+                if (strcmp(meeting_data[i][2], meeting_data[j][2]) == 0){
+                    if (strcmp(meeting_data[i][3], meeting_data[j][3]) > 0){
+                        // then swap
+
+                        for (int k = 0; k<5; k++){
+                            strcpy(temp, meeting_data[i][k]);
+                            strcpy(meeting_data[i][k], meeting_data[j][k]);
+                            strcpy(meeting_data[j][k], temp);
+                        }    
+                    }
+                    
+                }
+            }
+        }
+    }
+
+    /**
+     * sort based on name
+     */
+
+    memset(temp, 0, sizeof(temp));
+    for (i = 0; i<idx; i++){
+        for (j = i+1; j<idx; j++){
+            // should be from same day
+            if (strcmp(meeting_data[i][0], meeting_data[j][0]) == 0){
+                if (strcmp(meeting_data[i][2], meeting_data[j][2]) == 0){
+                    if (strcmp(meeting_data[i][3], meeting_data[j][3]) == 0){
+                         if (strcmp(meeting_data[i][1], meeting_data[j][1]) > 0){
+                            // then swap
+                            for (int k = 0; k<5; k++){
+                                strcpy(temp, meeting_data[i][k]);
+                                strcpy(meeting_data[i][k], meeting_data[j][k]);
+                                strcpy(meeting_data[j][k], temp);
+                            }    
+                         }
+                    }
+                    
+                }
+            }
+        }
+    }
+
+    // print
+    for(i = 0; i<idx; i++){
+        for (j = 0; j<5; j++){
+            printf("%s ",  meeting_data[i][j]);
+        }printf("\n");
+    }
+
+    char timeSlot[18][9] = {'0', };
+    for (i = 0; i<18; i++){
+        for (j = 0; j<9; j++){
+            timeSlot[i][j] = '0';
+            //printf("%c ", timeSlot[i][j]);
+        }
+        //printf("\n");
+    }
+
+
+    // run SJF
+    int pos = 0; int endTime = 0; int begin = 0;
+    begin = atoi(meeting_data[0][2]);
+    for (i = 0; i<idx; i++){
+        if (i != idx -1){
+            if (strcmp(meeting_data[i-1][0], meeting_data[i][0]) != 0){
+                printf("\n\nnew day!\n");
+                endTime = 0;
+                pos++;
+                printf("pos %d\n", pos);
+            }
+        }
+
+        int startTime = atoi(meeting_data[i][2]);
+        printf("start time %d endtime %d\n", startTime, endTime);
+        if (endTime > startTime){
+            printf("\trejected\n");
+        }
+        else{
+            
+            printf("%d \n", atoi(meeting_data[i][3]));
+            for (j= 0; j < atoi(meeting_data[i][3]); j++){
+                printf("recorded %s on %d\n", meeting_data[i][1], startTime+j);
+                
+                if (timeSlot[pos][startTime-9+j] != '0') break;
+                //printf("%c \n", meeting_data[i][1][5]);
+                printf("slot %d\n", startTime-9+j);
+                timeSlot[pos][startTime-9+j] = meeting_data[i][1][5];
+            }
+            endTime = atoi(meeting_data[i][4]);
+            printf("meeting finished at %d\n", endTime);
+        }
+        
+    }
+
+    for (i = 0; i<18; i++){
+        for (j = 0; j<9; j++){
+            printf("%c ", timeSlot[i][j]);
+        }
+        printf("\n");
+    }
+
+
+
+
+
     return;
 }
+
+
 void analyse_attendance(int fd[13][2]) {
     return;
 }
