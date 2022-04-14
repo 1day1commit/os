@@ -146,6 +146,8 @@ void FCFS() {
             printf("rejected: %s\n",rejected_meetings[x][y]);
         }
     }
+
+
     print_schedule(set_meetings, rejected_meetings, algorithm);
 }
 
@@ -175,7 +177,7 @@ void print_schedule(char accepted_meetings[162][5][1024], char rejected_meetings
     int i, j;
     int p = 0, k = 0, accepted_length = 0, rejected_length = 0; //number of scheduled and rejected requests
     while(1){ //getting the number of accepted meetings
-        if (strcmp(accepted_meetings[p][0],"") != 0){
+        if (strcmp(accepted_meetings[p][0],"") != 0 && strcmp(accepted_meetings[p][0],"0") != 0){
             p++;
             accepted_length ++;
         } else {
@@ -183,15 +185,22 @@ void print_schedule(char accepted_meetings[162][5][1024], char rejected_meetings
         }
     }
     while(1){ //getting the number of rejected requests
-        if (strcmp(rejected_meetings[k][0],"") != 0){
+        if (strcmp(rejected_meetings[k][0],"") != 0 && strcmp(rejected_meetings[p][0],"0") != 0){
             k++;
             rejected_length ++;
         } else {
             break;
         }
     }
+    // for (int x=0; x<accepted_length; x++){
+    //     printf("Working loop?\n");
+    //     for(int y=0; y<5;y++){
+    //         printf("accepted: %s\n",accepted_meetings[x][y]);
+    //     }
+    // }
+
     int total_length = accepted_length + rejected_length;
-    printf("Total length: %d, Rejected length: %d \n", accepted_length, rejected_length);
+    printf("Accepted length: %d, Rejected length: %d \n", accepted_length, rejected_length);
     //===========FOR TESTING ONLY===========
     char *algorithmA = "FCFS";
     char *startDate = "2022-04-25";
@@ -240,29 +249,34 @@ void print_schedule(char accepted_meetings[162][5][1024], char rejected_meetings
 
     for( i = 0; i < rejected_length; i++){
         j=0;
-        fprintf(fp, "%d.  %s  %s  %s  %d", i+1, rejected_meetings[i][j+1], rejected_meetings[i][j], rejected_meetings[i][j+2], rejected_meetings[i][j+3]);
+        fprintf(fp, "%d.  %s  %s  %s  %s\n", i+1, rejected_meetings[i][j+1], rejected_meetings[i][j], rejected_meetings[i][j+2], rejected_meetings[i][j+3]);
     } 
 
     fprintf(fp, "====================================================================================== \n");
 
-    int accepted_hours;
-    int rejected_hours;
+    int accepted_hours = 0;
+    int rejected_hours = 0;
     for (i = 0; i < accepted_length; i++){
         accepted_hours += atoi(accepted_meetings[i][3]);
     }
+    printf("accepted hours: %d\n", accepted_hours);
     for (i = 0; i < rejected_length; i++){
         rejected_hours += atoi(rejected_meetings[i][3]);
     }
+    printf("rejected hours: %d\n", rejected_hours);
+    int total_hours = accepted_hours + rejected_hours;
+    printf("total hours: %d\n", total_hours);
 
-    float total_utilization = (accepted_hours + rejected_hours) / 162; 
-    float accepted_utilization = accepted_hours / 162;
-    float rejected_utilization = rejected_hours / 162;
+    float total_utilization = (float)total_hours / (float)162; 
+    printf("total utilization: %.2f\n", total_utilization);
+    float accepted_utilization = (float)accepted_hours / (float)162;
+    float rejected_utilization = (float)rejected_hours / (float)162;
     char *blanks = "";
 
     fprintf(fp, "Performance: \n\n");
-    fprintf(fp, "Total Number of Requests Received: %d (%.1f%%)\n", total_length, total_utilization);
-    fprintf(fp, "%5s Number of Requests Received: %d (%.1f%%)\n", blanks, accepted_length, accepted_utilization);
-    fprintf(fp, "%5s Number of Requests Rejected: %d (%.1f%%)\n\n", blanks, rejected_length, rejected_utilization);
+    fprintf(fp, "Total Number of Requests Received: %d (%.2f%%)\n", total_length, total_utilization);
+    fprintf(fp, "%5s Number of Requests Received: %d (%.2f%%)\n", blanks, accepted_length, accepted_utilization);
+    fprintf(fp, "%5s Number of Requests Rejected: %d (%.2f%%)\n\n", blanks, rejected_length, rejected_utilization);
     fprintf(fp, "Utilization of Time Slot: \n\n");
     fprintf(fp, "%4s Accepted request %10s - %.1f%%\n", blanks, blanks, total_utilization);
     //===================== needs to receive Team & staff info ===============
