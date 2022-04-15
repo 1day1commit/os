@@ -236,7 +236,7 @@ int main() {
             printf("1.   Create Project Team\n\n");
             printf("2.   Project Meeting Request\n");
             printf("2a.  Single input\n2b.  Batch input\n2c.  Meeting Attendance\n\n");
-            printf("3.  Print Meeting Schedule\n3a.  FCFS (First Come First Served)\n3b.  XXXX (Another algorithm implemented)\n3c.  YYYY (Attendance Report) \n\n");
+            printf("3.  Print Meeting Schedule\n3a.  FCFS (First Come First Served)\n3b.  SJF (Shortest Job First)\n3c.  YYYY (Attendance Report) \n\n");
             printf("4.  Exit\n\nEnter an option: ");
             fgets(command, 100, stdin);
             strncpy(option, command, 1);
