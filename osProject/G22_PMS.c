@@ -22,6 +22,7 @@ struct Staff {
 struct Project {
     int Member[4];
     int Staff_number;
+    int mananger;
 };
 
 char create_pro_team[3] = {'c', 'p', 0};
@@ -178,6 +179,7 @@ int main() {
                             staff_number--;
                             i++;
                         }
+                        project[index].mananger = information[i] - 'A';
                     }
                     if (strcmp(operation, exit_PMS) == 0) {
                         break;
