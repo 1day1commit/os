@@ -766,7 +766,7 @@ void SJF(int fd[13][2]) {
         for (j = i+1; j<idx; j++){
             if (strcmp(meeting_data[i][0], meeting_data[j][0]) > 0){
                 // then swap
-                for (int k = 0; k<5; k++){
+                for (k = 0; k<5; k++){
                     strcpy(temp, meeting_data[i][k]);
                     strcpy(meeting_data[i][k], meeting_data[j][k]);
                     strcpy(meeting_data[j][k], temp);
@@ -787,7 +787,7 @@ void SJF(int fd[13][2]) {
                 if (strcmp(meeting_data[i][2], meeting_data[j][2]) > 0){
                     // then swap
 
-                    for (int k = 0; k<5; k++){
+                    for (k = 0; k<5; k++){
                         strcpy(temp, meeting_data[i][k]);
                         strcpy(meeting_data[i][k], meeting_data[j][k]);
                         strcpy(meeting_data[j][k], temp);
@@ -809,7 +809,7 @@ void SJF(int fd[13][2]) {
                     if (strcmp(meeting_data[i][3], meeting_data[j][3]) > 0){
                         // then swap
 
-                        for (int k = 0; k<5; k++){
+                        for (k = 0; k<5; k++){
                             strcpy(temp, meeting_data[i][k]);
                             strcpy(meeting_data[i][k], meeting_data[j][k]);
                             strcpy(meeting_data[j][k], temp);
@@ -834,7 +834,7 @@ void SJF(int fd[13][2]) {
                     if (strcmp(meeting_data[i][3], meeting_data[j][3]) == 0){
                          if (strcmp(meeting_data[i][1], meeting_data[j][1]) > 0){
                             // then swap
-                            for (int k = 0; k<5; k++){
+                            for (k = 0; k<5; k++){
                                 strcpy(temp, meeting_data[i][k]);
                                 strcpy(meeting_data[i][k], meeting_data[j][k]);
                                 strcpy(meeting_data[j][k], temp);
