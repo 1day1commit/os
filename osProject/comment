@@ -73,3 +73,5 @@ ZhangXinyu 4.3 work commit: debug the main function ,single_input_meeting_reques
 Gurkan 4.10 work commit: Since the program requires a lot of memory to debug, added a test function for create_project_team function. It prints out the content of the both Project and the Staff structs after creating the teams and entering 0 in the create_project_team.
 
 ZhangXinyu 4.10 work commit: fix a huge bug which is not closed all processes at the end
+
+ZhangXinyu 4.16 work commit: add mananger to Project struct
