@@ -62,6 +62,8 @@ void SJF(int fd[13][2]) {
     // Team_A 2022-04-25 09:00 2
     // 3. store data
     char meeting_data[162][5][1024];
+    char rected_meetings[162][5][1024];
+
     char buffer[1024]; char *token; int idx = 0;
     while (!feof(fp)){
         i = 0;
@@ -257,7 +259,14 @@ void SJF(int fd[13][2]) {
 
 
 
-
+    /**
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
 
     return;
 }
