@@ -138,6 +138,7 @@ int main() {
 
         while (true) {
             if ((num = read(toChild[index][0], buf, 10)) > 0) {
+                printf("buf %s\n", buf);
                 operation[0] = buf[0];
                 operation[1] = buf[1];
                 operation[2] = 0;
@@ -280,14 +281,14 @@ int main() {
 }
 
 
-int readPipeManager(int fd[13][2], int managerIndex){
-    char buffer[1024];
-    printf("mi %d\n", managerIndex);
-    read(fd[managerIndex][0], buffer, sizeof(buffer));
-    printf("buffer %s\n", buffer);        
+// int readPipeManager(int fd[13][2], int managerIndex){
+//     char buffer[1024];
+//     printf("mi %d\n", managerIndex);
+//     read(fd[managerIndex][0], buffer, sizeof(buffer));
+//     printf("buffer %s\n", buffer);        
 
-    return 0;
-}
+//     return 0;
+// }
 
 
 
@@ -343,7 +344,7 @@ void create_project_team(int fd[13][2], char *command, int len) {
             //read(fd[useful_inf[i] - 'A'][0], buf, sizeof(buf));
             printf("\n----------readPipe---------\n");
 
-            readPipeManager(fd, useful_inf[2]-'A');            
+            //readPipeManager(fd, useful_inf[2]-'A');            
             
         } else {
             printf("writing pipe member %d %d\n", i, useful_inf[i]-'A');
@@ -631,41 +632,42 @@ void FCFS(int fd[13][2], char useful_inf[30]) {
 
 
 void SJF(int fd[13][2]) {
-    int i, j;
+    int i, j, k;
 
-    /**
-     * Dummy Data
-     */
-    projectss p1, p2, p3, p4, p5;
-    // Team_A Project_A Alan Cathy Fanny Helen
-    strcpy(p1.team_name, "A");
-    strcpy(p1.project_name, "A");
-    strcpy(p1.manager, "A");
-    strcpy(p1.member, "CFH");
 
-    // Team_B Project_B Billy Alan Eva Gary
-    strcpy(p2.team_name,"B");
-    strcpy(p2.project_name, "B");
-    strcpy(p2.manager, "B");
-    strcpy(p2.member, "AEG");
+    // /**
+    //  * Dummy Data
+    //  */
+    // projects p1, p2, p3, p4, p5;
+    // // Team_A Project_A Alan Cathy Fanny Helen
+    // strcpy(p1.team_name, "A");
+    // strcpy(p1.project_name, "A");
+    // strcpy(p1.manager, "A");
+    // strcpy(p1.member, "CFH");
 
-    // Team_C Project_C Cathy Alan David Eva
-    strcpy(p3.team_name,"C");
-    strcpy(p3.project_name, "C");
-    strcpy(p3.manager, "C");
-    strcpy(p3.member, "ADE");
+    // // Team_B Project_B Billy Alan Eva Gary
+    // strcpy(p2.team_name,"B");
+    // strcpy(p2.project_name, "B");
+    // strcpy(p2.manager, "B");
+    // strcpy(p2.member, "AEG");
 
-    // Team_D Project_D David Alan Cathy Billy
-    strcpy(p4.team_name,"D");
-    strcpy(p4.project_name, "D");
-    strcpy(p4.manager, "D");
-    strcpy(p4.member, "ACB");
+    // // Team_C Project_C Cathy Alan David Eva
+    // strcpy(p3.team_name,"C");
+    // strcpy(p3.project_name, "C");
+    // strcpy(p3.manager, "C");
+    // strcpy(p3.member, "ADE");
 
-    // Team_E Project_E Eva Billy David Helen
-    strcpy(p5.team_name,"E");
-    strcpy(p5.project_name, "E");
-    strcpy(p5.manager, "E");
-    strcpy(p5.member, "BDH");
+    // // Team_D Project_D David Alan Cathy Billy
+    // strcpy(p4.team_name,"D");
+    // strcpy(p4.project_name, "D");
+    // strcpy(p4.manager, "D");
+    // strcpy(p4.member, "ACB");
+
+    // // Team_E Project_E Eva Billy David Helen
+    // strcpy(p5.team_name,"E");
+    // strcpy(p5.project_name, "E");
+    // strcpy(p5.manager, "E");
+    // strcpy(p5.member, "BDH");
 
 
     
