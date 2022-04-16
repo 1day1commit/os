@@ -22,6 +22,7 @@ struct Staff {
 struct Project {
     int Member[4];
     int Staff_number;
+    int mananger;
 };
 
 char create_pro_team[3] = {'c', 'p', 0};
@@ -150,46 +151,19 @@ int main() {
                     continue;
                 }
 
-                
-
-
                 if (index < 8) {// Staff
                     if (strcmp(operation, create_pro_team) == 0) {
                         //printf("The information length %lu\n", strlen(information));
                         if (strlen(information) <= 3) {// member
-
                             staff[index].Project[staff[index].attend_team_number] = information[1] - 'A';
                             staff[index].Team[staff[index].attend_team_number] = information[0] - 'A';
                             staff[index].attend_team_number++;
-
-                            printf("%d %d %d\n", staff[index].Project[staff[index].attend_team_number], staff[index].Project[staff[index].attend_team_number], staff[index].attend_team_number );
-                            
-                            printf("Information[0] %c\n", information[0]);
-                            
-                            printf("Information[1] %c\n", information[1]);
-
-                            printf("assign %d\n", information[1] - 'A'); 
-                            printf("s Project %d\n", staff[index].Project[staff[index].attend_team_number]);
-                            printf("assign %d\n", information[0] - 'A');
-                            printf("s Team %d\n", staff[index].Team[staff[index].attend_team_number]);
-                            printf("s Team number %d\n\n", staff[index].attend_team_number++);
                         }
                         if (strlen(information) > 3) {// manager
                             staff[index].Project[staff[index].attend_team_number] = information[1] - 'A';
                             staff[index].Team[staff[index].attend_team_number] = information[0] - 'A';
                             staff[index].attend_team_number++;
                             staff[index].Manager = information[0] - 'A';
-
-                            printf("ma Index %d information %s\n", index, information);
-
-                            printf("ma Information[0] %c\n", information[0]);
-                            printf("ma Information[1] %c\n", information[1]);
-                        
-                            printf("ma Project %d\n", staff[index].Project[staff[index].attend_team_number]);
-                            printf("ma Team %d\n", staff[index].Team[staff[index].attend_team_number]);
-                            printf("ma Team number %d\n", staff[index].attend_team_number++);
-
-                            printf("%d Manager %d\n\n", index, staff[index].Manager);
                         }
                     }
                     if (strcmp(operation, exit_PMS) == 0) {
@@ -205,16 +179,13 @@ int main() {
                             staff_number--;
                             i++;
                         }
+                        project[index].mananger = information[i] - 'A';
                     }
                     if (strcmp(operation, exit_PMS) == 0) {
                         break;
                     }
                 }
             }
-
-
-
-
         }
         close(toChild[index][0]);
         close(toParent[index][1]);
@@ -264,6 +235,12 @@ int main() {
                 for (i = 0; i < 8; i++) {
                     read(toParent[i][0], read_data[i], sizeof(read_data[i]) + 1);
                 }           
+                // for(i = 0; i<8; i++){
+                //     for(j=0; j<5; j++){
+                //         printf("%d ", read_data[i][j]);
+                //     }
+                //     printf("\n");
+                // }    
 
                 while (true) {
                     printf("\nEnter> ");
@@ -434,7 +411,9 @@ int batch_input_meeting_request(int fd[13][2], char *command) {
     char buf[MAX_LINE];
     char use_inf[30];
     FILE *fp;
-    printf("%s\n", useful_inf);
+//    printf("%s\n", useful_inf);
+//    printf("%d\n", strlen(useful_inf));
+    useful_inf[strlen(useful_inf) - 1] = '\0';
     if ((fp = fopen(useful_inf, "r")) == NULL) {
         printf("fail to read the file\n");
         return -1;
@@ -444,7 +423,6 @@ int batch_input_meeting_request(int fd[13][2], char *command) {
         len = strlen(buf);
         buf[len] = '\0';    //Maybe not -1//
         strcpy(use_inf, buf);
-        //strcat(toInputFile, use_inf);
         if (single_input_meeting_request(fd, use_inf) > 0) {
             line_num++;
         }else{
@@ -687,7 +665,6 @@ void FCFS(int fd[13][2], char useful_inf[30], int read_data[8][5]) {
     print_schedule(fd, read_data, set_meetings, rejected_meetings, index1, index2, "FCFS");
     return;
 }
-
 
 
 void SJF(int fd[13][2], int read_data[8][5]) {
@@ -999,7 +976,6 @@ void SJF(int fd[13][2], int read_data[8][5]) {
 }
 
 
-
 void analyse_attendance(int fd[13][2]) {
     return;
 }
@@ -1209,6 +1185,7 @@ void print_schedule(int fd[13][2], int read_data[8][5], char accepted_meetings[1
     char staffName[8][10] = {"Alan", "Billy", "Cathy", "David", "Eva", "Fanny", "Gary", "Helen"};
     char teamName[5][10] = {"Team_A", "Team_B", "Team_C", "Team_D", "Team_E"};
     char *blank = "";
+    int staffHours[8] = {0};
 
     FILE *fp;
     char filename[30];
@@ -1250,6 +1227,7 @@ void print_schedule(int fd[13][2], int read_data[8][5], char accepted_meetings[1
                 }
                 else if(read_data[i][k] == num){
                     j=0;
+                    staffHours[i] += atoi(accepted_meetings[l][j+3]); // For calculation of each Staff's utilization
                     fprintf(fp, "%s %11s %5s:00 %10s       Project_%c\n\n",accepted_meetings[l][j], accepted_meetings[l][j+2], accepted_meetings[l][j+4], accepted_meetings[l][j+1], accepted_meetings[l][j+1][5]); //need to work with projects
                     break;
                 }
@@ -1258,7 +1236,6 @@ void print_schedule(int fd[13][2], int read_data[8][5], char accepted_meetings[1
 
         }
     }
-
     fprintf(fp, "====================================================================================== \n");
     fprintf(fp, "%36s - End - %36s\n", blank, blank);
 
@@ -1310,15 +1287,12 @@ void print_schedule(int fd[13][2], int read_data[8][5], char accepted_meetings[1
         accepted_utilization = ((float)accepted_hours / 162.0) * 100.0;
         fprintf(fp, "%4s %s %20s - %.1f%%\n", blanks, teamName[i], blanks, accepted_utilization);
     }
+    for (i = 0; i < 8; i++){
+        float staff_Utilization = ((float)staffHours[i] / 162.0) * 100;
+        fprintf(fp, "%4s Staff_%c %19s - %.1f%%\n", blanks, staffName[i][0], blanks, staff_Utilization);
+        
+    }
 
-    
-
-
-
-    fprintf(fp, "%4s Team_A %20s - %.1f%%\n", blanks, blanks, accepted_utilization);
-    fprintf(fp, "%4s Team_B %20s - %.1f%%\n", blanks, blanks, accepted_utilization);
-    fprintf(fp, "%4s Staff_A %19s - %.1f%%\n", blanks, blanks, accepted_utilization);
-    fprintf(fp, "%4s Staff_B %19s - %.1f%%\n", blanks, blanks, accepted_utilization);
     
     fclose(fp);
     printf("Printed. Export file name: %s\n", filename);
