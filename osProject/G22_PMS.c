@@ -411,7 +411,9 @@ int batch_input_meeting_request(int fd[13][2], char *command) {
     char buf[MAX_LINE];
     char use_inf[30];
     FILE *fp;
-    printf("%s\n", useful_inf);
+//    printf("%s\n", useful_inf);
+//    printf("%d\n", strlen(useful_inf));
+    useful_inf[strlen(useful_inf) - 1] = '\0';
     if ((fp = fopen(useful_inf, "r")) == NULL) {
         printf("fail to read the file\n");
         return -1;
@@ -421,7 +423,6 @@ int batch_input_meeting_request(int fd[13][2], char *command) {
         len = strlen(buf);
         buf[len] = '\0';    //Maybe not -1//
         strcpy(use_inf, buf);
-        //strcat(toInputFile, use_inf);
         if (single_input_meeting_request(fd, use_inf) > 0) {
             line_num++;
         }else{
