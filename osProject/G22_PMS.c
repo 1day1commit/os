@@ -669,17 +669,39 @@ void FCFS(int fd[13][2], char useful_inf[30], int read_data[8][5]) {
 
 void SJF(int fd[13][2], int read_data[8][5]) {
     int i, j, k, l; 
+
     int rejectedMeetingCount = 0;
     int approvedMeetingCount = 0;
+    /*
+        Meeting arrays
+        - set_meetings: approved meeting list
+        - rejected_meetings: rejected meeting list
+
+     */
+
+    char set_meetings[162][5][1024];
+    char rejected_meetings[162][5][1024];
+
+    // initialize both arrays
+    for(i=0; i<162; i++){
+        for(j=0; j<5; j++){
+            strcpy(set_meetings[i][j], "0");    //using "0" as placeholders
+            strcpy(rejected_meetings[i][j], "0");
+        }
+    }
+
+
     // 1. read input file
     FILE *fp;
     fp = fopen("Input_Meeting.txt", "r");
 
     // 2. read project info
     // Team_A 2022-04-25 09:00 2
+
     // 3. store data
     char meeting_data[162][5][1024];
-    char buffer[1024]; char *token; int idx = 0;
+    char buffer[1024]; char *token; 
+    int idx = 0; // number of meeting
     while(fgets(buffer, 1024, fp) != NULL){
         if(strcmp(buffer, "\n") != 0 && strcmp(buffer, "\r\n") != 0 && strcmp(buffer, "\0") != 0){
             i = 0;
@@ -688,7 +710,6 @@ void SJF(int fd[13][2], int read_data[8][5]) {
 
             while (token != NULL){
                 // store date first
-                //meeting_data[idx][i] = (char *)malloc(sizeof(char) * 1024);
                 if (i == 0){ // Team_A
                     strcpy(meeting_data[idx][1], token);
                 }
@@ -717,7 +738,6 @@ void SJF(int fd[13][2], int read_data[8][5]) {
         }
     else{continue;}
     } // end of reading function
-    //free(token);
     fclose(fp);
 
     // strip
@@ -725,82 +745,58 @@ void SJF(int fd[13][2], int read_data[8][5]) {
         meeting_data[i][3][strlen(meeting_data[i][3])-1] = '\0';
     }
 
-    char set_meetings[162][5][1024];
-    char rejected_meetings[162][5][1024];
-
-
-    for(i=0; i<162; i++){
-        for(j=0; j<5; j++){
-            strcpy(set_meetings[i][j], "0");    //using "0" as placeholders
-            strcpy(rejected_meetings[i][j], "0");
-        }
-    }
-
     char start_date[11];
     char end_date[11];
-    int len, index1=0, index2=0, track;    //index1 gives the no of accepted meeting requests and index2 gives the no of rejected meeting requests
     strcpy(start_date, "2022-04-25");  //record the starting date
     strcpy(end_date, "2022-05-14");   //record the end date
-    //len = strlen(start_date);   
-    //start_date[len-1] = '\0';    
-    //len = strlen(end_date);
-    //end_date[len-1] = '\0';
 
-    //printf("idx %d\n", idx);
+
+    /**
+     * Compare Meeting lists
+     * 
+     * 1. Date
+     * 2. Meeting Start Time
+     * 3. Meeting End Time
+     * 
+     */
     for(i=0; i<idx; i++){
-        //track = 1;
-        // printf("---> ");
-        // printf("%s %s %s %s %s\n", 
-        // meeting_data[i][0], meeting_data[i][1], meeting_data[i][2], meeting_data[i][3], meeting_data[i][4]);
         for(j=0; j<5; j++){
             if(j == 0){ // comparing date (2022-04-25)
-                if(strcmp(meeting_data[i][j], start_date) < 0){   //if date of meeting is outside the allowed meeting schedule
-                    track = 0;
-                    //printf("Rejected from date ");
+                //if date of meeting is outside the allowed meeting schedule
+                if(strcmp(meeting_data[i][j], start_date) < 0 && strcmp(meeting_data[i][j], end_date) > 0){ 
+                    // store in reject array  
                     for(l=0; l<5; l++){
-                        //printf("%s ", meeting_data[i][l]);
                         strcpy(rejected_meetings[rejectedMeetingCount][l], meeting_data[i][l]);
                     }
-                    //printf("\n");
                     rejectedMeetingCount++;
                     break;
                 }
             }
             else if(j == 2){ // comparing time (09:00)
                 if(atoi(meeting_data[i][j]) < 9){    //if starting time of meeting less than 09:00
-                    track = 0;
-                    //printf("Rejected from time ");
                     for(l=0; l<5; l++){
-                        //printf("%s ", meeting_data[i][l]);
                         strcpy(rejected_meetings[rejectedMeetingCount][l], meeting_data[i][l]);
                     }
-                    //printf("\n");
                     rejectedMeetingCount++;
                     break;
                 }
             }
             else if(j == 4){ //if ending time of meeting more than 18:00 
                 if(atoi(meeting_data[i][j]) > 18){
-                    track = 0;
-                    //printf("Rejected from 미팅 시간 아웃 ");
                     for(l=0; l<5; l++){
-                        //printf("%s ", meeting_data[i][l]);
                         strcpy(rejected_meetings[rejectedMeetingCount][l], meeting_data[i][l]);
                     }
-                    //printf("\n");
                     rejectedMeetingCount++;
                     break;
                 }  
-                for(k=0; k<162; k++){   ///MAYBE need to change 162
+                for(k=0; k<162; k++){ 
                     //to check for new meetings with the already scheduled meetings
                     if(strcmp(set_meetings[k][0], meeting_data[i][0]) == 0){     //if meeting on the same day
-                        track = 0;
                         //if the meeting does not conflict with the time period of an already scheduled meeting
                         if((strcmp(meeting_data[i][2], set_meetings[k][2]) <= 0  &&  strcmp(meeting_data[i][4], set_meetings[k][2]) <= 0) || (strcmp(meeting_data[i][2], set_meetings[k][4]) >= 0  &&  strcmp(meeting_data[i][4], set_meetings[k][4]) >= 0)){
                             for(l=0; l<5; l++){
                                 strcpy(set_meetings[approvedMeetingCount][l], meeting_data[i][l]);
                             }
-                            //approvedMeetingCount++;
                         } //if meeting conflicts
                         else{
                             for(l=0; l<5; l++){
@@ -813,12 +809,6 @@ void SJF(int fd[13][2], int read_data[8][5]) {
                 }              
             }
         }
-        // if(track == 1){
-        //     for(l=0; l<5; l++){
-        //         strcpy(set_meetings[approvedMeetingCount][l], meeting_data[i][l]);
-        //     }
-        //     approvedMeetingCount++;          
-        // }
     }
     
 
@@ -864,7 +854,7 @@ void SJF(int fd[13][2], int read_data[8][5]) {
 
 
     /**
-     * sort based on duration?
+     * sort based on duration of meeting
      */
     memset(temp, 0, sizeof(temp));
     for (i = 0; i<idx; i++){
@@ -913,57 +903,29 @@ void SJF(int fd[13][2], int read_data[8][5]) {
         }
     }
 
-
-    // // print
-    // for(i = 0; i<idx; i++){
-    //     for (j = 0; j<5; j++){
-    //         printf("%s ",  meeting_data[i][j]);
-    //     }printf("\n");
-    // }
-
-    char timeSlot[18][9] = {'0', };
-    for (i = 0; i<18; i++){
-        for (j = 0; j<9; j++){
-            timeSlot[i][j] = '0';
-            //printf("%c ", timeSlot[i][j]);
-        }
-        //printf("\n");
-    }
-
-
     // run SJF
-    int pos = 0; int endTime = 0; int begin = 0;
+    int endTime = 0; int begin = 0;
     begin = atoi(meeting_data[0][2]);
     for (i = 0; i<idx; i++){
-        // printf("\n\n\n\nMeeting---> ");
-        // printf("%s %s %s %s %s\n", 
-        //     meeting_data[i][0], meeting_data[i][1], meeting_data[i][2], meeting_data[i][3], meeting_data[i][4]);
         // until it is not last meeting
         if (i != idx && i != 0){
             // check if the date are same
             // if not, reset the end time
             if (strcmp(meeting_data[i-1][0], meeting_data[i][0]) != 0){
-                //printf("\n\nnew day!\n");
                 endTime = 0;
-                pos++;
-                //printf("pos %d\n", pos);
             }
         }
 
         // extract start time
         int startTime = atoi(meeting_data[i][2]);
-        //printf("start time %d endtime %d\n", startTime, endTime);
 
         // if end time is bigger than start time, reject
         // e.g) previous meeting ends at 11:00AM and next meeting starts at 9:00AM
         if (endTime > startTime){
-            //printf("\trejected\n");
             rejectedMeetingCount++;
-            //printf("rejected Meeting %d\n", rejectedMeetingCount);
 
             // copy meeting info as rejected
             for (j = 0; j<5; j++){
-                //printf("meeting_data %s\n", meeting_data[i][j]);
                 strcpy(rejected_meetings[rejectedMeetingCount-1][j], meeting_data[i][j]);
 
             }
@@ -971,51 +933,21 @@ void SJF(int fd[13][2], int read_data[8][5]) {
 
         // if not,
         else{ // approved meeting
-            //printf("approved meeting %d\n", approvedMeetingCount);
             // copy meeting info as approved
             for (k = 0; k<5; k++){
-                //printf("%s ", meeting_data[i][k]);
                 strcpy(set_meetings[approvedMeetingCount][k], meeting_data[i][k]);
             }
-            // printf("\n\n");        
-            // printf("---> ");
-            // printf("%s %s %s %s %s\n", 
-            // set_meetings[approvedMeetingCount][0], set_meetings[approvedMeetingCount][1], set_meetings[approvedMeetingCount][2], set_meetings[approvedMeetingCount][3], set_meetings[approvedMeetingCount][4]);
+
             approvedMeetingCount++;
-
-            // printf("%d \n", atoi(meeting_data[i][3]));
-            // for (j= 0; j < atoi(meeting_data[i][3]); j++){ // duration
-
-            //     printf("recorded %s on %d\n", meeting_data[i][1], startTime+j);
-                
-            //     if (timeSlot[pos][startTime-9+j] != '0') break;
-            //     //printf("%c \n", meeting_data[i][1][5]);
-            //     printf("slot %d\n", startTime-9+j);
-            //     timeSlot[pos][startTime-9+j] = meeting_data[i][1][5];
-                
-            // }
             endTime = atoi(meeting_data[i][4]);
-            //printf("meeting finished at %d\n", endTime);
         }
 
         
     
         
     }
-
-    //printf("rejected Meeting %d\n", rejectedMeetingCount);
+    // approvedMeeting : number of meeting - rejected meeting
     approvedMeetingCount = idx - rejectedMeetingCount;
-    //printf("Approved Meeting %d\n", approvedMeetingCount); 
-
-    // for (i = 0; i<approvedMeetingCount; i++){
-    //     for (j = 0; j<5; j++){
-    //         printf("%s ", set_meetings[i][j]);
-    //     }
-    //     printf("\n");
-    // }
-
-
-    
 
     print_schedule(fd, read_data, set_meetings, rejected_meetings, approvedMeetingCount, rejectedMeetingCount, "SJF");
 
