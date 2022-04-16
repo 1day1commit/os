@@ -1122,6 +1122,7 @@ void print_schedule(int fd[13][2], int read_data[8][5], char accepted_meetings[1
     char staffName[8][10] = {"Alan", "Billy", "Cathy", "David", "Eva", "Fanny", "Gary", "Helen"};
     char teamName[5][10] = {"Team_A", "Team_B", "Team_C", "Team_D", "Team_E"};
     char *blank = "";
+    int staffHours[8] = {0};
 
     FILE *fp;
     char filename[30];
@@ -1163,6 +1164,7 @@ void print_schedule(int fd[13][2], int read_data[8][5], char accepted_meetings[1
                 }
                 else if(read_data[i][k] == num){
                     j=0;
+                    staffHours[i] += atoi(accepted_meetings[l][j+3]); // For calculation of each Staff's utilization
                     fprintf(fp, "%s %11s %5s:00 %10s       Project_%c\n\n",accepted_meetings[l][j], accepted_meetings[l][j+2], accepted_meetings[l][j+4], accepted_meetings[l][j+1], accepted_meetings[l][j+1][5]); //need to work with projects
                     break;
                 }
@@ -1171,7 +1173,6 @@ void print_schedule(int fd[13][2], int read_data[8][5], char accepted_meetings[1
 
         }
     }
-
     fprintf(fp, "====================================================================================== \n");
     fprintf(fp, "%36s - End - %36s\n", blank, blank);
 
@@ -1223,15 +1224,12 @@ void print_schedule(int fd[13][2], int read_data[8][5], char accepted_meetings[1
         accepted_utilization = ((float)accepted_hours / 162.0) * 100.0;
         fprintf(fp, "%4s %s %20s - %.1f%%\n", blanks, teamName[i], blanks, accepted_utilization);
     }
+    for (i = 0; i < 8; i++){
+        float staff_Utilization = ((float)staffHours[i] / 162.0) * 100;
+        fprintf(fp, "%4s Staff_%c %19s - %.1f%%\n", blanks, staffName[i][0], blanks, staff_Utilization);
+        
+    }
 
-    
-
-
-
-    fprintf(fp, "%4s Team_A %20s - %.1f%%\n", blanks, blanks, accepted_utilization);
-    fprintf(fp, "%4s Team_B %20s - %.1f%%\n", blanks, blanks, accepted_utilization);
-    fprintf(fp, "%4s Staff_A %19s - %.1f%%\n", blanks, blanks, accepted_utilization);
-    fprintf(fp, "%4s Staff_B %19s - %.1f%%\n", blanks, blanks, accepted_utilization);
     
     fclose(fp);
     printf("Printed. Export file name: %s\n", filename);
