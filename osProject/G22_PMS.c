@@ -25,6 +25,9 @@ struct Project {
     int Staff_number;
     int mananger;
 };
+// Project staff count
+int proj_participation[8] = {0,0,0,0,0,0,0,0};
+
 
 // FCFS, SJF
 int file_print[2] = {1, 1};
@@ -239,19 +242,28 @@ int main() {
                     } else {
                         int read_manager[8];
                         for (i = 0; i < 8; i++) {
+                            //printf("parent send %s\n", find_managers);
                             write(toChild[i][1], find_managers, strlen(find_managers) + 1);    //need to add the null character
                         }    
+                        //printf("read_manager\n");
                         for (i = 0; i < 8; i++) {
+
                             read(toParent[i][0], &read_manager[i], sizeof(read_manager[i]));
+                            //printf("%d ", read_manager[i]);
                         }  
+                        printf("\n");
 
                         for (i = 0; i < 8; i++) {
+                            //printf("parent sends %s\n", pass_data);
                             write(toChild[i][1], pass_data, strlen(pass_data) + 1);    //need to add the null character
                         }
+                        //printf("read_data\n");
 
                         for (i = 0; i < 8; i++) {
                             read(toParent[i][0], read_data[i], sizeof(read_data[i]));     //not sure if +1 *****************************//
+                            //printf("%d ", read_data[i]);
                         }
+                       // printf("\n");
 
                         create_project_team(toChild, command, len, read_manager, read_data);
                     }
@@ -348,10 +360,29 @@ int main() {
 void create_project_team(int fd[13][2], char *command, int len, int read_manager[8], int read_data[8][5]) {
     char staffName[8][10] = {"Alan", "Billy", "Cathy", "David", "Eva", "Fanny", "Gary", "Helen"};
     char teamName[5][10] = {"Team_A", "Team_B", "Team_C", "Team_D", "Team_E"};
+
     char useful_inf[6];
     char **res = split(command, " ");
     int i=0, j=0;
+    int k, n;
 
+    // printf("command %s\n", command);
+    // printf("-----------------------before checking-----------------------\n");
+    // printf("\nread_manager ");
+    // for (k = 0; k<8; k++){
+    //     printf("%d ", read_manager[k]);
+    // }
+    // printf("\n");
+
+    // printf("read_data \n");
+    // for (k= 0; k<8; k++){
+    //     for (n = 0; n<5; n++){
+    //        printf("%d ", read_data[k][n]); 
+    //     }
+    //     printf("\n"); 
+    // }
+    
+    //printf("\n");
     // useful_inf
     // e.g) Team_A Project_A Alan Cathy Fanny Helen
     // useful_inf =  AAACFH
@@ -370,38 +401,48 @@ void create_project_team(int fd[13][2], char *command, int len, int read_manager
         i++;
     }
 
-    // printf("read_manager ");
-    // for (i = 0; i<8; i++){
-    //     printf("%d ", read_manager[i]);
-    // }
-    // printf("\n");
-
-    // printf("read_data \n");
-    // for (i = 0; i<8; i++){
-    //     for (j = 0; j<5; j++){
-    //        printf("%d ", read_data[i][j]); 
-    //     }
-    //     printf("\n"); 
-    // }
-    // printf("\n");
+    // printf("%c %c %c %c %c %c\n", 
+    //     useful_inf[0], useful_inf[1], useful_inf[2], useful_inf[3], useful_inf[4], useful_inf[5]);
 
     // A-A
-    int manager = useful_inf[2] - 'A';
-    int team = useful_inf[0] - 'A';
+    int manager = useful_inf[2] - 'A'; // 
+    int team = useful_inf[0] - 'A'; //
     int team_no=0;
 
     /*
     Check staff occupy
      */
+
+    // 1. check if the manager is the manager of other project
     //printf("manager %d team %d\n", manager, team);
-    for(i=0; i<8; i++){
-        if(i == manager){
-            if(read_manager[i] != -1){
-                printf("Staff member %s is already a manager of %s\n\n", staffName[i], teamName[i]);
-                return;
-            }
-        }
+    //printf("read_manager[manager] %d\n", read_manager[manager]);
+    if (read_manager[manager] != -1){
+        // if not -1, it is already a manager of other project
+        printf("Staff member %s is already a manager of %s\n\n", staffName[manager], teamName[read_manager[manager]]);
+        return;
     }
+    
+
+    // 2. check staff member participation count
+    // if manager is already participated in 3 projects,
+
+    if(proj_participation[manager] >= 3){
+        printf("Staff member %s is already a member of 3 other teams\n\n", staffName[manager]);
+        return;          
+    }      
+
+
+    // if staff is already participated in 3 projects,
+    for (i = 0; i<3; i++){
+        // calculate the position of staff in array
+        int pos = useful_inf[3+i] - 'A';
+        if (pos < 0){continue;}
+        if (proj_participation[pos] >= 3){
+            printf("Staff member %s is already a member of 3 other teams\n\n", staffName[pos]);
+            return;
+        }//printf("participation count for %s is %d\n", staffName[pos], proj_participation[pos]);
+    }
+
 
     for(i=0; i<8; i++){
         team_no = 0;
@@ -411,16 +452,26 @@ void create_project_team(int fd[13][2], char *command, int len, int read_manager
                 return;
             }
             if(read_data[i][j] != -1){
-                team_no++;
+                continue;
+                //proj_participation[i]++;
             }
         }
-        if(team_no >= 3){
-            printf("Staff member %s is already a member of 3 other teams\n\n", staffName[i]);
-            return;          
-        }
-    }   
+        
+    } 
 
-    int useful_inf_len = i;
+
+    // if pass both requirements, can create project
+    // increment project participation count for manager and count
+    proj_participation[manager]++;
+    for (i = 0; i<3; i++){
+        int pos = useful_inf[3+i] - 'A';
+        if (pos < 0) {continue;}
+        proj_participation[pos]++;
+    }
+
+
+
+    int useful_inf_len = 8;
     char to_member_message[10];
     char to_manager_message[10];
     char to_project_message[10];
