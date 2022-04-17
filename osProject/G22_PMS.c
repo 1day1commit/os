@@ -11,6 +11,7 @@
 #define MAX_LINE 162
 #define MAX_REQUEST 999
 
+
 struct Staff {
     int Project[5];
     int Manager;
@@ -24,6 +25,10 @@ struct Project {
     int Staff_number;
     int mananger;
 };
+
+// FCFS, SJF
+int file_print[2] = {1, 1};
+
 
 char create_pro_team[3] = {'c', 'p', 0};
 char project_meeting_book[3] = {'p', 'b', 0};
@@ -60,7 +65,15 @@ void analyse_attendance(char start_date[11], char end_date[11], int time_period,
 
 char staffName[8][15] = {"Alan", "Billy", "Cathy", "David", "Eva", "Fanny", "Gary", "Helen"};
 
+int checkOccupied(){
 
+    return 1;
+}
+
+int haveManagerStaff(){
+
+    return 1;
+}
 
 int main() {
     int i,j;
@@ -296,10 +309,12 @@ int main() {
                         strncpy(useful_inf, command + 13, 30);
                         FCFS(toParent, useful_inf, read_data, "");    //has to pass in parent
                     } else if (strncmp(command, "For 3b", 6) == 0) {
+                        strncpy(useful_inf, command + 13, 30);
                         SJF(toParent, useful_inf, read_data, "");     //has to pass in parent
                     } else if (strncmp(command, "For 3c", 6) == 0) {
                         strncpy(useful_inf, command + 12, 30);
                         FCFS(toParent, useful_inf, read_data, "SAR");
+                        SJF(toParent, useful_inf, read_data, "SAR");
                     } else if (strncmp(command, "0", 1) == 0) {
                         break;
                     }
@@ -336,6 +351,14 @@ void create_project_team(int fd[13][2], char *command, int len, int read_manager
     char useful_inf[6];
     char **res = split(command, " ");
     int i=0, j=0;
+
+    // useful_inf
+    // e.g) Team_A Project_A Alan Cathy Fanny Helen
+    // useful_inf =  AAACFH
+    // useful_inf[0] = Team
+    // useful_inf[1] = Project
+    // useful_inf[2] = Manager
+    // useful_inf[3] ~ [5] = Staff
     while (res[i] != NULL) {
         if (i == 0) {
             useful_inf[i] = res[i][5];
@@ -347,14 +370,34 @@ void create_project_team(int fd[13][2], char *command, int len, int read_manager
         i++;
     }
 
+    // printf("read_manager ");
+    // for (i = 0; i<8; i++){
+    //     printf("%d ", read_manager[i]);
+    // }
+    // printf("\n");
+
+    // printf("read_data \n");
+    // for (i = 0; i<8; i++){
+    //     for (j = 0; j<5; j++){
+    //        printf("%d ", read_data[i][j]); 
+    //     }
+    //     printf("\n"); 
+    // }
+    // printf("\n");
+
+    // A-A
     int manager = useful_inf[2] - 'A';
     int team = useful_inf[0] - 'A';
-    int team_no;
+    int team_no=0;
 
+    /*
+    Check staff occupy
+     */
+    //printf("manager %d team %d\n", manager, team);
     for(i=0; i<8; i++){
         if(i == manager){
-            if(read_manager[i] == team){
-                printf("Staff member %s is already a manager of Team %c\n\n", staffName[i], useful_inf[0]);
+            if(read_manager[i] != -1){
+                printf("Staff member %s is already a manager of %s\n\n", staffName[i], teamName[i]);
                 return;
             }
         }
@@ -371,7 +414,7 @@ void create_project_team(int fd[13][2], char *command, int len, int read_manager
                 team_no++;
             }
         }
-        if(team_no > 3){
+        if(team_no >= 3){
             printf("Staff member %s is already a member of 3 other teams\n\n", staffName[i]);
             return;          
         }
@@ -840,7 +883,9 @@ void SJF(int fd[13][2], char useful_inf[30], int read_data[8][5], char *command)
     strncpy(end_date, useful_inf + 11, 10);    //record the end date
     end_date[strlen(end_date)] = '\0';
     
-        //Finding the no of days for the scheduling
+    printf("useful_inf %s\n", useful_inf);
+    printf("start %s end %s\n", start_date, end_date);
+    //Finding the no of days for the scheduling
     strncpy(num_days, start_date+8, 2);
     num_days[strlen(num_days)] = '\0';
     day1 = atoi(num_days);
@@ -848,6 +893,9 @@ void SJF(int fd[13][2], char useful_inf[30], int read_data[8][5], char *command)
     strncpy(num_days, end_date+8, 2);
     num_days[strlen(num_days)] = '\0';
     day2 = atoi(num_days);
+    printf("start+8 %s end+8 %s\n", start_date+8, end_date+8);
+
+    printf("day1 %d day2 %d\n", day1, day2);
 
     if(day2 >= day1){
         time_period = ((day2 - day1) + 1) * 9;
@@ -1052,6 +1100,14 @@ void SJF(int fd[13][2], char useful_inf[30], int read_data[8][5], char *command)
         
     }
 
+    printf("accepted meeting\n");
+    for (i = 0; i<approvedMeetingCount; i++){
+        for (j = 0; j<5; j++){
+            printf("%s ", set_meetings[i][j]);
+        }
+        printf("\n");
+    }
+
     char check_origin[10];
     strcpy(check_origin, command);
     check_origin[strlen(check_origin)] = '\0';
@@ -1067,6 +1123,7 @@ void SJF(int fd[13][2], char useful_inf[30], int read_data[8][5], char *command)
     if(strcmp(check_origin, "MAR") == 0){    //For part 3b
 
     }
+    
     print_schedule(fd, read_data, set_meetings, rejected_meetings,  approvedMeetingCount, rejectedMeetingCount, time_period, "SJF");
     return;
 }
@@ -1374,12 +1431,8 @@ char **split(char *str, char *delimiter) {
 }
 
 
-void print_schedule(int fd[13][2], int read_data[8][5], char accepted_meetings[162][5][1024], char rejected_meetings[162][5][1024], int index1, int index2, int time_peroid, char *algorithm) {    
+void print_schedule(int fd[13][2], int read_data[8][5], char accepted_meetings[162][5][1024], char rejected_meetings[162][5][1024], int accepted_length, int rejected_length, int time_peroid, char *algorithm) {    
     int i, j, k, l;
-    int accepted_length, rejected_length; //number of scheduled and rejected requests
-
-    accepted_length = index1;
-    rejected_length = index2;
 
     int total_length = accepted_length + rejected_length;
 
@@ -1391,14 +1444,15 @@ void print_schedule(int fd[13][2], int read_data[8][5], char accepted_meetings[1
     FILE *fp;
     char filename[30];
 
-    int num = 1; //file name (MAYBE HAS TO BE A GLOBAL VARIABLE)
+    // increment file print count
+    if (strcmp(algorithm, "FCFS") == 0){
+        sprintf(filename, "Schedule_%s_%02d.txt",algorithm, file_print[0]);
+        file_print[0]++;
+    }else if (strcmp(algorithm, "SJF") == 0){
+        sprintf(filename, "Schedule_%s_%02d.txt",algorithm, file_print[1]);
+        file_print[1]++;
+    }
 
-    int result = sprintf(filename, "Schedule_%s_%02d.txt",algorithm, num);
-
-    int teams[5];
-
-    num++;
-    
     fp = fopen(filename,"w+");
     if (fp == NULL) {
         fprintf(stderr, "Failed to open the file");
@@ -1453,13 +1507,19 @@ void print_schedule(int fd[13][2], int read_data[8][5], char accepted_meetings[1
 
     int accepted_hours=0;
     int rejected_hours=0;
+
+    printf("acceted meetings\n");
     for (i = 0; i < accepted_length; i++){
+        printf("%s ", accepted_meetings[i][3]);
         accepted_hours += atoi(accepted_meetings[i][3]);
     }
+    printf("\nrejected meetings\n");
     for (i = 0; i < rejected_length; i++){
+        printf("%s ", rejected_meetings[i][3]);
         rejected_hours += atoi(rejected_meetings[i][3]);
     }
-
+    printf("\n");
+    printf("time period %d\n", time_peroid);
 
     float total_utilization = ((float)(accepted_hours + rejected_hours) / (float)time_peroid) * 100.0; 
     float accepted_utilization = ((float)accepted_hours / (float)time_peroid) * 100.0;
