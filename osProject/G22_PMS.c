@@ -353,17 +353,43 @@ void create_project_team(int fd[13][2], char *command, int len, int read_manager
         }
         i++;
     }
-
+    int infosize = i;
     int manager = useful_inf[2] - 'A'; // 
     int team = useful_inf[0] - 'A'; //
     int project = useful_inf[1] - 'A'; //
     int team_no=0;
-
-/*
+    
+    /*
     Check staff occupy
-     */
+    */
+    
+    // 1. check if the prompt consists of more than 4 members.
+    if (infosize > 6){
+        if (infosize == 3) {
+            printf("Project Team must be consists of at least one project member.\n");
+        }
+        else {
+            printf("Project team can not be consists of more than 4 staff members.\n");
+        }
+        return;
+    }
+    
+    // 2. check if the prompt consists of duplicate information.
+    for (i = 0; i < infosize; ++i) {
+        for (j = i+1 ; j < infosize; ++j) {
+            if ( strncmp(res[i],res[j], strlen(res[i])) == 0 ) {
+                if (i == 2) {
+                    printf("Manager cannot be a project member of the team.\n");
+                }
+                else {
+                    printf("Prompt consists of duplicate elements. Please try again!\n");
+                }
+                return;
+            }
+        }
+    }
 
-    // 1. check if the manager is the manager of other project
+    // 3. check if the manager is the manager of other project
     //printf("manager %d team %d\n", manager, team);
     //printf("read_manager[manager] %d\n", read_manager[manager]);
     if (read_manager[manager] != -1){
@@ -373,7 +399,7 @@ void create_project_team(int fd[13][2], char *command, int len, int read_manager
     }
     
 
-    // 2. check staff member participation count
+    // 4. check staff member participation count
     // if manager is already participated in 3 projects,
 
     if(proj_participation[manager] >= 3){
@@ -685,13 +711,14 @@ void analyse_attendance(char useful_inf[30], char start_date[11], char end_date[
         staffHour = 0;
         total_meeting = 0;
 
+        for(j=0; j<5; j++){
+            if(read_data[i][j] != -1){
+                team_no++;
+            }
+        }
+
         for(l=0; l<accepted_length; l++){
             int num = accepted_meetings[l][1][5] - 'A';
-            for(j=0; j<5; j++){
-                if(read_data[i][j] != -1){
-                    team_no++;
-                }
-            }
             for(k=0; k<5; k++){
                 if(read_data[i][k] == -1){
                     continue;
@@ -708,7 +735,7 @@ void analyse_attendance(char useful_inf[30], char start_date[11], char end_date[
         attendance_rate[i] = attendance;
 
         fprintf(fp, "%s will attend a total of %d meetings as being part of %d different teams\n", staffName[i], total_meeting, team_no);
-        fprintf(fp, "%s will have an attendace rate of %.1f%% during the time period from %s to %s\n\n", staffName[i], attendance, start_date, end_date);
+        fprintf(fp, "%s will have an attendance rate of %.1f%% during the time period from %s to %s\n\n", staffName[i], attendance, start_date, end_date);
     }  
     fprintf(fp, "====================================================================================== \n");
 
@@ -1100,10 +1127,10 @@ void SJF(char useful_inf[30], int read_data[8][5], char *command) {
     char end_date[11];
     char num_days[5];
 
-    strcpy(start_date, "2022-04-25");  //record the starting date
-    strcpy(end_date, "2022-05-14");   //record the end date   
-    start_date[strlen(start_date)] = '\0';    
-    end_date[strlen(end_date)] = '\0';
+    // strcpy(start_date, "2022-04-25");  //record the starting date
+    // strcpy(end_date, "2022-05-14");   //record the end date   
+    // start_date[strlen(start_date)] = '\0';    
+    // end_date[strlen(end_date)] = '\0';
 
 
     if(strcmp(check_origin, "MAR") != 0){
@@ -1115,11 +1142,11 @@ void SJF(char useful_inf[30], int read_data[8][5], char *command) {
         //Finding the no of days for the scheduling
         strncpy(num_days, start_date+8, 2);
         num_days[strlen(num_days)] = '\0';
-        day1 = atoi(num_days);
+        day1 = (int)atoi(num_days)/100;
 
         strncpy(num_days, end_date+8, 2);
         num_days[strlen(num_days)] = '\0';
-        day2 = atoi(num_days);
+        day2 = (int)atoi(num_days)/100;
 
         if(day2 >= day1){
             time_period = ((day2 - day1) + 1) * 9;
