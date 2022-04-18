@@ -397,7 +397,7 @@ void create_project_team(int fd[13][2], char *command, int len, int read_manager
     }      
 
     if (is_team_created[team] != 0) {
-        printf("Team %c has already been created, try a different team\n\n", useful_inf[0]);
+        printf("Project Team %c has already been created, try a different team\n\n", useful_inf[0]);
         return;
     }
     
@@ -1500,7 +1500,7 @@ void print_schedule(int read_data[8][5], char accepted_meetings[162][5][1024], c
     char *blanks = "";
 
     fprintf(fp, "Performance: \n\n");
-    fprintf(fp, "Total Number of Requests Received: %d (100%)\n", total_length);
+    fprintf(fp, "Total Number of Requests Received: %d (100%%)\n", total_length);
     fprintf(fp, "%5s Number of Requests Accepted: %d (%.1f%%)\n", blanks, accepted_length, accepted_rates);
     fprintf(fp, "%5s Number of Requests Rejected: %d (%.1f%%)\n\n", blanks, rejected_length, rejected_rates);
     fprintf(fp, "Utilization of Time Slot: \n\n");
