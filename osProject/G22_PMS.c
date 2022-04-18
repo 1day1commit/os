@@ -685,13 +685,14 @@ void analyse_attendance(char useful_inf[30], char start_date[11], char end_date[
         staffHour = 0;
         total_meeting = 0;
 
+        for(j=0; j<5; j++){
+            if(read_data[i][j] != -1){
+                team_no++;
+            }
+        }
+
         for(l=0; l<accepted_length; l++){
             int num = accepted_meetings[l][1][5] - 'A';
-            for(j=0; j<5; j++){
-                if(read_data[i][j] != -1){
-                    team_no++;
-                }
-            }
             for(k=0; k<5; k++){
                 if(read_data[i][k] == -1){
                     continue;
