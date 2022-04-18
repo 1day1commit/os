@@ -382,8 +382,6 @@ void create_project_team(int fd[13][2], char *command, int len, int read_manager
     }
 
     // 3. check if the manager is the manager of other project
-    //printf("manager %d team %d\n", manager, team);
-    //printf("read_manager[manager] %d\n", read_manager[manager]);
     if (read_manager[manager] != -1){
         // if not -1, it is already a manager of other project
         printf("Staff member %s is already a manager of %s\n\n", staffName[manager], teamName[read_manager[manager]]);
@@ -393,7 +391,6 @@ void create_project_team(int fd[13][2], char *command, int len, int read_manager
 
     // 4. check staff member participation count
     // if manager is already participated in 3 projects,
-
     if(proj_participation[manager] >= 3){
         printf("Staff member %s is already a member of 3 other teams\n\n", staffName[manager]);
         return;          
@@ -417,7 +414,7 @@ void create_project_team(int fd[13][2], char *command, int len, int read_manager
         if (proj_participation[pos] >= 3){
             printf("Staff member %s is already a member of 3 other teams\n\n", staffName[pos]);
             return;
-        }//printf("participation count for %s is %d\n", staffName[pos], proj_participation[pos]);
+        }
     }
 
 
@@ -520,7 +517,7 @@ int batch_input_meeting_request(int fd[13][2], char *command) {
     char buf[MAX_LINE];
     char use_inf[30];
     FILE *fp;
-    useful_inf[strlen(useful_inf) - 1] = '\0';          //Maybe not -1//
+    useful_inf[strlen(useful_inf) - 1] = '\0';
     if ((fp = fopen(useful_inf, "r")) == NULL) {
         printf("fail to read the file\n");
         return -1;
@@ -528,9 +525,8 @@ int batch_input_meeting_request(int fd[13][2], char *command) {
 
     while (fgets(buf, MAX_LINE, fp) != NULL) {
         len = strlen(buf);
-        buf[len] = '\0';    //Maybe not -1//
+        buf[len] = '\0';
         strcpy(use_inf, buf);
-        //strcat(toInputFile, use_inf);
         if (single_input_meeting_request(fd, use_inf) > 0) {
             line_num++;
         }else{
