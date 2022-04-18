@@ -11,7 +11,6 @@
 #define MAX_LINE 162
 #define MAX_REQUEST 999
 
-
 struct Staff {
     int Project[5];
     int Manager;
@@ -23,14 +22,8 @@ struct Staff {
 struct Project {
     int Member[4];
     int Staff_number;
-    int mananger;
 };
-// Project staff count
-int proj_participation[8] = {0,0,0,0,0,0,0,0};
 
-
-// FCFS, SJF
-int file_print[2] = {1, 1};
 
 
 char create_pro_team[3] = {'c', 'p', 0};
@@ -44,14 +37,8 @@ char find_managers[3] = {'f', 'm', 0};
 
 
 int extract_int(char *s, int start, int len);
-int year(int yr);
-int month(int yr, int mth);
-bool is_valid_day(char *s1);
 bool is_valid_time(char *s1);
 bool is_valid_duration(int x);
-int day(char *s1, char *s2);
-char *IntToString(int num, char *str);
-char *IntToDay(char *startDate, int start, int num);
 char **split(char *str, char *delimiter);
 
 
@@ -59,26 +46,24 @@ void create_project_team(int fd[13][2], char *command, int len, int read_manager
 void test_cp_func(struct Staff *stuff, struct Project *project);
 int single_input_meeting_request(int fd[13][2], char *useful_inf);
 int batch_input_meeting_request(int fd[13][2], char *useful_inf);
-void meeting_attendance_request(int fd[13][2]);
-void FCFS(int fd[13][2], char useful_inf[30], int read_data[8][5], char *command);
-void SJF(int fd[13][2], char useful_inf[30], int read_data[8][5], char *command);
-void print_schedule(int fd[13][2], int read_data[8][5], char accepted_meetings[162][5][1024], char rejected_meetings[162][5][1024], int index1, int index2, int time_peroid, char *algorithm);
-void analyse_attendance(char start_date[11], char end_date[11], int time_period, int read_data[8][5], char accepted_meetings[162][5][1024], char rejected_meetings[162][5][1024], int index1, int index2, char *algorithm);
+void meeting_attendance_request(char start_date[11], char end_date[11], int read_data[8][5], char accepted_meetings[162][5][1024], char rejected_meetings[162][5][1024], int index1, int index2, char *algorithm);
+void FCFS(char useful_inf[30], int read_data[8][5], char *command);
+void SJF(char useful_inf[30], int read_data[8][5], char *command);
+void print_schedule(int read_data[8][5], char accepted_meetings[162][5][1024], char rejected_meetings[162][5][1024], int index1, int index2, int time_peroid, char *algorithm);
+void analyse_attendance(char useful_inf[30], char start_date[11], char end_date[11], int time_period, int read_data[8][5], char accepted_meetings[162][5][1024], char rejected_meetings[162][5][1024], int index1, int index2, char *algorithm);
+
+// Project staff count
+int proj_participation[8] = {0,0,0,0,0,0,0,0};
+//Store Utilization from FCFS scheduling
+float store_util[2] = {0.0};
+int file_num = 1;
 
 
-char staffName[8][15] = {"Alan", "Billy", "Cathy", "David", "Eva", "Fanny", "Gary", "Helen"};
-
-int checkOccupied(){
-
-    return 1;
-}
-
-int haveManagerStaff(){
-
-    return 1;
-}
 
 int main() {
+    // FILE *input_file;
+    // input_file = fopen("Input_Meeting.txt", "w");
+    // fclose(input_file);
     int i,j;
     int toChild[13][2];
     int toParent[13][2];
@@ -225,8 +210,8 @@ int main() {
             printf("1.   Create Project Team\n\n");
             printf("2.   Project Meeting Request\n");
             printf("2a.  Single input\n2b.  Batch input\n2c.  Meeting Attendance\n\n");
-            printf("3.  Print Meeting Schedule\n3a.  FCFS (First Come First Served)\n3b.  SJF (Shortest Job First)\n3c.  Attendance Report \n\n");
-            printf("4.  Exit\n\nEnter an option: ");
+            printf("3.   Print Meeting Schedule\n3a.  FCFS (First Come First Served)\n3b.  SJF (Shortest Job First)\n3c.  YYYY (Attendance Report) \n\n");
+            printf("4.   Exit\n\nEnter an option: ");
             fgets(command, 100, stdin);
             strncpy(option, command, 1);
             if (strncmp(option, "1", 1) == 0) {
@@ -242,28 +227,19 @@ int main() {
                     } else {
                         int read_manager[8];
                         for (i = 0; i < 8; i++) {
-                            //printf("parent send %s\n", find_managers);
                             write(toChild[i][1], find_managers, strlen(find_managers) + 1);    //need to add the null character
                         }    
-                        //printf("read_manager\n");
                         for (i = 0; i < 8; i++) {
-
                             read(toParent[i][0], &read_manager[i], sizeof(read_manager[i]));
-                            //printf("%d ", read_manager[i]);
                         }  
-                        printf("\n");
 
                         for (i = 0; i < 8; i++) {
-                            //printf("parent sends %s\n", pass_data);
                             write(toChild[i][1], pass_data, strlen(pass_data) + 1);    //need to add the null character
                         }
-                        //printf("read_data\n");
 
                         for (i = 0; i < 8; i++) {
                             read(toParent[i][0], read_data[i], sizeof(read_data[i]));     //not sure if +1 *****************************//
-                            //printf("%d ", read_data[i]);
                         }
-                       // printf("\n");
 
                         create_project_team(toChild, command, len, read_manager, read_data);
                     }
@@ -284,14 +260,13 @@ int main() {
                 //     }
                 //     printf("\n");
                 // }    
-
+                char useful_inf[30];
                 while (true) {
                     printf("\nEnter> ");
                     fgets(command, 100, stdin);
                     len = strlen(command);
                     command[len] = 0;    //**************************//
                     if (strncmp(command, "For 2a", 6) == 0) {
-                        char useful_inf[30];
                         strncpy(useful_inf, command + 8, 30);
                         if (single_input_meeting_request(toChild, useful_inf) < 0) {
 
@@ -299,16 +274,17 @@ int main() {
                             printf(">>>>>>Project Meeting request has been accepted\n");
                         }
                     } else if (strncmp(command, "For 2b", 6) == 0) {
-                        char useful_inf[30];
                         strncpy(useful_inf, command + 8, 30);
                         int record_num = 0;
                         record_num = batch_input_meeting_request(toChild, useful_inf);
-                        printf(">>>>>>%d valid meeting requests have been recorded\n", record_num);
+                        printf(">>>>>> %d valid meeting requests have been recorded\n", record_num);
+                    } else if (strncmp(command, "For 2c", 6) == 0) {
+                        strncpy(useful_inf, command + 8, 30);
+                        FCFS(useful_inf, read_data, "MAR");
+                        SJF(useful_inf, read_data, "MAR");
                     } else if (strncmp(command, "0", 1) == 0) {
                         break;
-                    } else {
-                        meeting_attendance_request(toChild);
-                    }
+                    } 
                 }
             } else if (strncmp(option, "3", 1) == 0) {
                 char useful_inf[30];
@@ -319,14 +295,14 @@ int main() {
                     command[len] = 0;    //**************************//
                     if (strncmp(command, "For 3a", 6) == 0) {
                         strncpy(useful_inf, command + 13, 30);
-                        FCFS(toParent, useful_inf, read_data, "");    //has to pass in parent
+                        FCFS(useful_inf, read_data, "");    //removed pipes
                     } else if (strncmp(command, "For 3b", 6) == 0) {
                         strncpy(useful_inf, command + 13, 30);
-                        SJF(toParent, useful_inf, read_data, "");     //has to pass in parent
+                        SJF(useful_inf, read_data, "");    //removed pipes
                     } else if (strncmp(command, "For 3c", 6) == 0) {
                         strncpy(useful_inf, command + 12, 30);
-                        FCFS(toParent, useful_inf, read_data, "SAR");
-                        SJF(toParent, useful_inf, read_data, "SAR");
+                        FCFS(useful_inf, read_data, "SAR");
+                        SJF(useful_inf, read_data, "SAR");
                     } else if (strncmp(command, "0", 1) == 0) {
                         break;
                     }
@@ -360,36 +336,11 @@ int main() {
 void create_project_team(int fd[13][2], char *command, int len, int read_manager[8], int read_data[8][5]) {
     char staffName[8][10] = {"Alan", "Billy", "Cathy", "David", "Eva", "Fanny", "Gary", "Helen"};
     char teamName[5][10] = {"Team_A", "Team_B", "Team_C", "Team_D", "Team_E"};
-
     char useful_inf[6];
     char **res = split(command, " ");
     int i=0, j=0;
     int k, n;
 
-    // printf("command %s\n", command);
-    // printf("-----------------------before checking-----------------------\n");
-    // printf("\nread_manager ");
-    // for (k = 0; k<8; k++){
-    //     printf("%d ", read_manager[k]);
-    // }
-    // printf("\n");
-
-    // printf("read_data \n");
-    // for (k= 0; k<8; k++){
-    //     for (n = 0; n<5; n++){
-    //        printf("%d ", read_data[k][n]); 
-    //     }
-    //     printf("\n"); 
-    // }
-    
-    //printf("\n");
-    // useful_inf
-    // e.g) Team_A Project_A Alan Cathy Fanny Helen
-    // useful_inf =  AAACFH
-    // useful_inf[0] = Team
-    // useful_inf[1] = Project
-    // useful_inf[2] = Manager
-    // useful_inf[3] ~ [5] = Staff
     while (res[i] != NULL) {
         if (i == 0) {
             useful_inf[i] = res[i][5];
@@ -401,15 +352,11 @@ void create_project_team(int fd[13][2], char *command, int len, int read_manager
         i++;
     }
 
-    // printf("%c %c %c %c %c %c\n", 
-    //     useful_inf[0], useful_inf[1], useful_inf[2], useful_inf[3], useful_inf[4], useful_inf[5]);
-
-    // A-A
     int manager = useful_inf[2] - 'A'; // 
     int team = useful_inf[0] - 'A'; //
     int team_no=0;
 
-    /*
+/*
     Check staff occupy
      */
 
@@ -444,22 +391,6 @@ void create_project_team(int fd[13][2], char *command, int len, int read_manager
     }
 
 
-    for(i=0; i<8; i++){
-        team_no = 0;
-        for(j=0; j<5; j++){
-            if(read_data[i][j] == team){
-                printf("Staff member %s is already a member of Team %c\n\n", staffName[i], useful_inf[0]);
-                return;
-            }
-            if(read_data[i][j] != -1){
-                continue;
-                //proj_participation[i]++;
-            }
-        }
-        
-    } 
-
-
     // if pass both requirements, can create project
     // increment project participation count for manager and count
     proj_participation[manager]++;
@@ -468,8 +399,7 @@ void create_project_team(int fd[13][2], char *command, int len, int read_manager
         if (pos < 0) {continue;}
         proj_participation[pos]++;
     }
-
-
+   
 
     int useful_inf_len = 8;
     char to_member_message[10];
@@ -499,7 +429,6 @@ void create_project_team(int fd[13][2], char *command, int len, int read_manager
 }
 
 
-
 int single_input_meeting_request(int fd[13][2], char useful_inf[30]) {
     FILE *input_file;
     input_file = fopen("Input_Meeting.txt", "a");
@@ -519,10 +448,10 @@ int single_input_meeting_request(int fd[13][2], char useful_inf[30]) {
     strncpy(day, useful_inf + 7, 10);
     strncpy(start_time, useful_inf + 18, 5);
     strncpy(hours, useful_inf + 24, 1);
-    if (!is_valid_day(day)) {
-        printf("It has an invalid date\n");
-        return -1;
-    }
+    // if (!is_valid_day(day)) {
+    //     printf("It has an invalid date\n");
+    //     return -1;
+    // }
     if (!is_valid_time(start_time)) {
         printf("It has an invalid start time\n");
         return -1;
@@ -551,7 +480,6 @@ int single_input_meeting_request(int fd[13][2], char useful_inf[30]) {
 
 
 int batch_input_meeting_request(int fd[13][2], char *command) {
-    printf("command : %s\n", command);
     char useful_inf[30];
     char toInputFile[30];
     strcpy(useful_inf, command);
@@ -560,9 +488,7 @@ int batch_input_meeting_request(int fd[13][2], char *command) {
     char buf[MAX_LINE];
     char use_inf[30];
     FILE *fp;
-//    printf("%s\n", useful_inf);
-//    printf("%d\n", strlen(useful_inf));
-    useful_inf[strlen(useful_inf) - 1] = '\0';
+    useful_inf[strlen(useful_inf) - 1] = '\0';          //Maybe not -1//
     if ((fp = fopen(useful_inf, "r")) == NULL) {
         printf("fail to read the file\n");
         return -1;
@@ -572,6 +498,7 @@ int batch_input_meeting_request(int fd[13][2], char *command) {
         len = strlen(buf);
         buf[len] = '\0';    //Maybe not -1//
         strcpy(use_inf, buf);
+        //strcat(toInputFile, use_inf);
         if (single_input_meeting_request(fd, use_inf) > 0) {
             line_num++;
         }else{
@@ -582,15 +509,241 @@ int batch_input_meeting_request(int fd[13][2], char *command) {
     return line_num;
 }
 
-void meeting_attendance_request(int fd[13][2]) {
+
+
+
+void meeting_attendance_request(char start_date[11], char end_date[11], int read_data[8][5], char accepted_meetings[162][5][1024], char rejected_meetings[162][5][1024], int index1, int index2, char *algorithm) {
+    int i, j, k, l;
+    int accepted_length, rejected_length; //number of scheduled and rejected requests
+    int total_hours, total_meeting;
+    float average;
+    char algorithm_used[10];
+    char teamName[5][10] = {"Team_A", "Team_B", "Team_C", "Team_D", "Team_E"};
+    float max_average = 0.0, min_average = 100.0;
+    char max_Team, min_Team;
+
+    strcpy(algorithm_used, algorithm);
+    algorithm_used[strlen(algorithm_used)] = '\0';
+
+    accepted_length = index1;
+    rejected_length = index2; 
+
+    FILE *fp;
+    if(strcmp(algorithm_used, "FCFS") == 0){
+        fp = fopen("MAR.txt", "w+");
+        fprintf(fp, "*** Meeting Attendance Report *** \n\n");
+    }
+    else if(strcmp(algorithm_used, "SJF") == 0){
+        fp = fopen("MAR.txt", "a");
+    }
+
+    if (fp == NULL) {
+        fprintf(stderr, "Failed to open the file");
+        return;
+    }
+
+    fprintf(fp, "Algorithm used: %s \n", algorithm);
+    fprintf(fp, "====================================================================================== \n");  
+
+    for (i = 0; i < 5; i++) {
+        fprintf(fp, "For Project Team_ %c\n", teamName[i][5]);
+        total_meeting = 0;
+        total_hours = 0;
+
+        for(l=0; l<accepted_length; l++){
+            int num = accepted_meetings[l][1][5] - 'A';
+            if(num == i){
+                j=0;
+                total_hours += atoi(accepted_meetings[l][j+3]);
+                total_meeting++;
+            }
+        }
+        average = (float)total_hours / (float)total_meeting;
+
+        if(average > max_average){
+            max_average = average;
+            max_Team = teamName[i][5];
+        }
+        if(average < min_average){
+            min_average = average;
+            min_Team = teamName[i][5];
+        }
+        fprintf(fp, "Team_%c will have an average duration of %.1f hours for each of their meetings\n\n", teamName[i][5], average);
+    }  
+    fprintf(fp, "====================================================================================== \n");
+
+    fprintf(fp, "Out of all the teams, Project Team_%c will have the highest average duration of %.1f hours for each of their meetings\n", max_Team, max_average);
+    fprintf(fp, "And, Project Team_%c will have the lowest average duration of %.1f hours for each of their meetings\n", min_Team, min_average);
+
+    int accepted_hours=0;
+    int rejected_hours=0;
+    for (i = 0; i < accepted_length; i++){
+        accepted_hours += atoi(accepted_meetings[i][3]);
+    }
+    for (i = 0; i < rejected_length; i++){
+        rejected_hours += atoi(rejected_meetings[i][3]);
+    }
+    float total_utilization = ((float)(accepted_hours + rejected_hours) / 162.0) * 100.0; 
+    if(strcmp(algorithm_used, "FCFS") == 0){
+        store_util[0] = total_utilization;
+        store_util[1] = (float)rejected_length;
+    }
+
+    if(strcmp(algorithm_used, "SJF") == 0){
+        int fcfs_util = (int)store_util[1];
+        fprintf(fp, "====================================================================================== \n");
+        fprintf(fp, "Algorithm \"%s\" will have an utilization rate of %.3f%% during the time period from %s to %s\n\n", "FCFS", store_util[0], start_date, end_date);
+        fprintf(fp, "Algorithm \"%s\" will have an utilization rate of %.3f%% during the time period from %s to %s\n\n\n", "SJF", total_utilization, start_date, end_date);
+
+        fprintf(fp, "Algorithm \"%s\" rejected a total of %d meetings during the time period from %s to %s\n\n", "FCFS", fcfs_util, start_date, end_date);
+        fprintf(fp, "Algorithm \"%s\" rejected a total of %d meetings during the time period from %s to %s\n\n\n", "SJF", rejected_length, start_date, end_date);
+
+        if(store_util[0] < total_utilization){
+            fprintf(fp, "Here, Algorithm \"%s\" has a higher utilization rate than Algoritm \"%s\" in scheduling the meetings\n", "SJF", "FCFS");
+            fprintf(fp, "As a result, Algorithm \"%s\" is better in this instance to use, for achieving a higher timeslot utilization rate than Algorithm \"%s\"\n\n", "SJF", "FCFS");
+        }else if(store_util[0] > total_utilization){
+            fprintf(fp, "Here, Algorithm \"%s\" has a higher utilization rate than Algoritm \"%s\" in scheduling the meetings\n", "FCFS", "SJF");  
+            fprintf(fp, "As a result, Algorithm \"%s\" is better in this instance to use, for achieving a higher timeslot utilization rate than Algoritm \"%s\"\n\n", "FCFS", "SJF");          
+        }else{
+            fprintf(fp, "Here, both of the Algorithm \"%s\" and Algoritm \"%s\" have the same utilization rate in scheduling the meetings\n\n", "FCFS", "SJF");
+        }
+
+
+        if(fcfs_util < rejected_length){
+            fprintf(fp, "Also, Algorithm \"%s\" rejected a higher number of meetings than Algorithm \"%s\"\n", "SJF", "FCFS");
+            fprintf(fp, "As a result, Algorithm \"%s\" is better in this instance to schedule as many meetings as possible than compared to Algorithm \"%s\"\n\n", "FCFS", "SJF");
+
+        }else if(fcfs_util > rejected_length){
+            fprintf(fp, "Also, Algorithm \"%s\" rejected a higher number of meetings than Algorithm \"%s\"\n", "FCFS", "SJF"); 
+            fprintf(fp, "As a result, Algorithm \"%s\" is better in this instance to schedule as many meetings as possible than compared to Algorithm \"%s\"\n\n", "SJF", "FCFS");
+        }else{
+            fprintf(fp, "Here, both of the Algorithm \"%s\" and Algoritm \"%s\" rejected the same number of meetings\n\n", "FCFS", "SJF");
+        }
+
+        fprintf(fp, "====================================================================================== \n");
+    }
+
+    if(strcmp(algorithm_used, "SJF") == 0){
+        printf("Printed. Export file name: %s\n", "MAR.txt");
+    }
+    fclose(fp);
     return;
 }
 
 
 
-void FCFS(int fd[13][2], char useful_inf[30], int read_data[8][5], char *command) {
+void analyse_attendance(char useful_inf[30], char start_date[11], char end_date[11], int time_period, int read_data[8][5], char accepted_meetings[162][5][1024], char rejected_meetings[162][5][1024], int index1, int index2, char *algorithm) {
+    int i, j, k, l;
+    int accepted_length, rejected_length; //number of scheduled and rejected requests
+    int staffHour, team_no, total_meeting;
+    float attendance;
+    float max_attendance = 0.0, min_attendance = 100.0; 
+    float attendance_rate[8];
+    char algorithm_used[10];
+    char staffName[8][10] = {"Alan", "Billy", "Cathy", "David", "Eva", "Fanny", "Gary", "Helen"};
+
+    strcpy(algorithm_used, algorithm);
+    algorithm_used[strlen(algorithm_used)] = '\0';
+
+    accepted_length = index1;
+    rejected_length = index2; 
+
+    FILE *fp;
+    if(strcmp(algorithm_used, "FCFS") == 0){
+        fp = fopen("SAR.txt", "w+");
+        fprintf(fp, "*** Staff Attendance Report *** \n\n");
+    }
+    else if(strcmp(algorithm_used, "SJF") == 0){
+        fp = fopen("SAR.txt", "a");
+    }
+
+    if (fp == NULL) {
+        fprintf(stderr, "Failed to open the file");
+        return;
+    }
+
+    fprintf(fp, "Algorithm used: %s \n", algorithm);
+    fprintf(fp, "====================================================================================== \n");  
+
+    for (i = 0; i < 8; i++) {
+        fprintf(fp, "Staff: %s \n\n", staffName[i]);
+        team_no = 0;
+        staffHour = 0;
+        total_meeting = 0;
+
+        for(l=0; l<accepted_length; l++){
+            int num = accepted_meetings[l][1][5] - 'A';
+            for(j=0; j<5; j++){
+                if(read_data[i][j] != -1){
+                    team_no++;
+                }
+            }
+            for(k=0; k<5; k++){
+                if(read_data[i][k] == -1){
+                    continue;
+                }
+                else if(read_data[i][k] == num){
+                    j=0;
+                    staffHour += atoi(accepted_meetings[l][j+3]); 
+                    total_meeting++;
+                    break;
+                }
+            }
+        }
+        attendance = ((float)staffHour / (float)time_period) * 100.0;
+        attendance_rate[i] = attendance;
+
+        fprintf(fp, "%s will attend a total of %d meetings as being part of %d different teams\n", staffName[i], total_meeting, team_no);
+        fprintf(fp, "%s will have an attendace rate of %.1f%% during the time period from %s to %s\n\n", staffName[i], attendance, start_date, end_date);
+    }  
+    fprintf(fp, "====================================================================================== \n");
+
+    float temp;
+    char temp_staff[10];
+    char temp_staffName[8][10] = {"Alan", "Billy", "Cathy", "David", "Eva", "Fanny", "Gary", "Helen"};
+    for(i=0; i<8; i++){
+        for(j=i+1; j<8; j++){
+            if(attendance_rate[j] < attendance_rate[i]){
+                temp = attendance_rate[i];
+                attendance_rate[i] = attendance_rate[j];
+                attendance_rate[j] = temp;
+
+                strcpy(temp_staff, temp_staffName[i]);
+                strcpy(temp_staffName[i], temp_staffName[j]);
+                strcpy(temp_staffName[j], temp_staff);
+            }
+        }
+    }
+
+    max_attendance = attendance_rate[7];
+    min_attendance = attendance_rate[0];
+
+    fprintf(fp, "The attendance rates of all the staff from lowest to highest are as follows:\n\n");
+    for(i=0; i<8; i++){
+        fprintf(fp, "Staff: %s, Attendance rate: %.1f%%\n", temp_staffName[i], attendance_rate[i]);
+    }
+    fprintf(fp, "====================================================================================== \n");
+    fprintf(fp, "\nHere, Staff %s has the highest attendance rate of %.1f%% out of everybody else\n", temp_staffName[7], max_attendance);
+    fprintf(fp, ">>>>>> There is a very high chance that %s will always arrive at the meetings on time, and may never be late or not show up\n", temp_staffName[7]);
+    fprintf(fp, ">>>>>> And this might also be an indication that %s might be the best performing member in all of the project teams that he is a part of\n\n", temp_staffName[7]);
+   
+    fprintf(fp, "====================================================================================== \n");
+    fprintf(fp, "\nHere, Staff %s has the lowest attendance rate of %.1f%% out of everybody else\n", temp_staffName[0], min_attendance);
+    fprintf(fp, ">>>>>> There is a very high chance that %s will always arrive late at the meetings and very rarely show up on time\n", temp_staffName[0]);
+    fprintf(fp, ">>>>>> And this might also be an indication that %s might be the worst performing member in all of the project teams that he is a part of\n\n", temp_staffName[0]);   
+    fprintf(fp, "====================================================================================== \n");
+
+    if(strcmp(algorithm_used, "SJF") == 0){
+        printf("Printed. Export file name: %s\n", "SAR.txt");
+    }
+    fclose(fp);
+    return;
+}
+
+
+
+void FCFS(char useful_inf[30], int read_data[8][5], char *command) {
     int i, j, k, l, day1, day2, time_period=0;
-    char *algorithm = "FCFS";
     // 1. read input file
     FILE *fp;
     fp = fopen("Input_Meeting.txt", "r");
@@ -632,7 +785,7 @@ void FCFS(int fd[13][2], char useful_inf[30], int read_data[8][5], char *command
                 token = strtok (NULL, " ");
             }
             // record the end time
-            char endTime[3];
+            char endTime[10];
             end = start + duration;
             sprintf(endTime, "%d", end);
             strcpy(meeting_data[idx][4], endTime);        
@@ -665,34 +818,35 @@ void FCFS(int fd[13][2], char useful_inf[30], int read_data[8][5], char *command
     char end_date[11];
     char num_days[5];
     int len, index1=0, index2=0, track;    //index1 gives the no of accepted meeting requests and index2 gives the no of rejected meeting requests
-    strncpy(start_date, useful_inf, 10);   //record the starting date
-    start_date[strlen(start_date)] = '\0';
-    strncpy(end_date, useful_inf + 11, 10);    //record the end date
+
+    strcpy(start_date, "2022-04-25");  //record the starting date
+    strcpy(end_date, "2022-05-14");   //record the end date   
+    start_date[strlen(start_date)] = '\0';    
     end_date[strlen(end_date)] = '\0';
 
 
-    // strcpy(start_date, "2022-04-25");  //record the starting date
-    // strcpy(end_date, "2022-05-14");   //record the end date
-    // len = strlen(start_date);   
-    // start_date[len-1] = '\0';    
-    // len = strlen(end_date);
-    // end_date[len-1] = '\0';
+    if(strcmp(check_origin, "MAR") != 0){
+        strncpy(start_date, useful_inf, 10);   //record the starting date
+        start_date[strlen(start_date)] = '\0';
+        strncpy(end_date, useful_inf + 11, 10);    //record the end date
+        end_date[strlen(end_date)] = '\0';
 
+        //Finding the no of days for the scheduling
+        strncpy(num_days, start_date+8, 2);
+        num_days[strlen(num_days)] = '\0';
+        day1 = atoi(num_days);
 
-    //Finding the no of days for the scheduling
-    strncpy(num_days, start_date+8, 2);
-    num_days[strlen(num_days)] = '\0';
-    day1 = atoi(num_days);
+        strncpy(num_days, end_date+8, 2);
+        num_days[strlen(num_days)] = '\0';
+        day2 = atoi(num_days);
 
-    strncpy(num_days, end_date+8, 2);
-    num_days[strlen(num_days)] = '\0';
-    day2 = atoi(num_days);
-
-    if(day2 >= day1){
-        time_period = ((day2 - day1) + 1) * 9;
-    }else{
-        time_period = ((30 - day1 + 1) + day2) * 9;
+        if(day2 >= day1){
+            time_period = ((day2 - day1) + 1) * 9;
+        }else{
+            time_period = ((30 - day1 + 1) + day2) * 9;
+        }
     }
+
 
     for(i=0; i<idx; i++){
         track = 1;
@@ -726,32 +880,36 @@ void FCFS(int fd[13][2], char useful_inf[30], int read_data[8][5], char *command
                     index2++;
                     break;
                 }  
-                for(k=0; k<162; k++){   ///MAYBE need to change 162
+                int temp = index1;
+                int check = 1;
+                for(k=0; k<temp; k++){  
                     //to check for new meetings with the already scheduled meetings
                     if(strcmp(set_meetings[k][0], meeting_data[i][0]) == 0){     //if meeting on the same day
                         track = 0;
                         //if the meeting does not conflict with the time period of an already scheduled meeting
-                        if((strcmp(meeting_data[i][2], set_meetings[k][2]) <= 0  &&  strcmp(meeting_data[i][4], set_meetings[k][2]) <= 0) || (strcmp(meeting_data[i][2], set_meetings[k][4]) >= 0  &&  strcmp(meeting_data[i][4], set_meetings[k][4]) >= 0)){
-                            for(l=0; l<5; l++){
-                                strcpy(set_meetings[index1][l], meeting_data[i][l]);
-                            }
-                            index1++;
-                        } //if meeting conflicts
+                        if(strcmp(meeting_data[i][2], set_meetings[k][2]) <= 0  &&  strcmp(meeting_data[i][4], set_meetings[k][2]) <= 0){
+                            continue;
+                        }
+                        if(strcmp(meeting_data[i][2], set_meetings[k][4]) >= 0  &&  strcmp(meeting_data[i][4], set_meetings[k][4]) >= 0){
+                            continue;
+                        }
                         else{
+                            check = 0;
                             for(l=0; l<5; l++){
                                 strcpy(rejected_meetings[index2][l], meeting_data[i][l]);
                             }
-                            index2++;                        
+                            index2++; 
+                            break;                          
                         }
                     }
-                }              
+                }      
+                if(check == 1 || track == 1){
+                    for(l=0; l<5; l++){
+                        strcpy(set_meetings[index1][l], meeting_data[i][l]);
+                    }
+                    index1++;                    
+                }        
             }
-        }
-        if(track == 1){
-            for(l=0; l<5; l++){
-                strcpy(set_meetings[index1][l], meeting_data[i][l]);
-            }
-            index1++;          
         }
     }
 
@@ -824,40 +982,34 @@ void FCFS(int fd[13][2], char useful_inf[30], int read_data[8][5], char *command
         }
     }
 
-    /* FOR THE OUTPUT FUNCTION: 
-    *  So "set_meetings" contains all the scheduled meetings and index1 is the number of accepted meetings
-    * "rejected_meetings" contains all the rejected meetings and index2 is the number of rejected meetings
-    *  useful_inf will give start date for fcfs and useful_inf + 11 will give end date for fcfs
-    *  Need to call the output function from inside of this function with all four of these parameters 
-    *  A fifth parameter might be needed to specify which function is calling the output function, i.e. fcfs or sjf
-    *  For printing meeting schedule of each staff, at first we need to read the data from the pipe of each of the child process (1-8)
-    *  This is to get info from the Staff struct of each of the child, so that we know which staff is involved in which projects 
-    */
-
     if(strcmp(check_origin, "SAR") == 0){    //For part 3c
-        analyse_attendance(start_date, end_date, time_period, read_data, set_meetings, rejected_meetings, index1, index2, "FCFS");
+        analyse_attendance(useful_inf, start_date, end_date, time_period, read_data, set_meetings, rejected_meetings, index1, index2, "FCFS");
         return;
     }
-    if(strcmp(check_origin, "MAR") == 0){    //For part 3b
-
+    if(strcmp(check_origin, "MAR") == 0){    //For part 2c
+        meeting_attendance_request(start_date, end_date, read_data, set_meetings, rejected_meetings, index1, index2, "FCFS");
+        return;
     }
-    print_schedule(fd, read_data, set_meetings, rejected_meetings, index1, index2, time_period, "FCFS");
+    print_schedule(read_data, set_meetings, rejected_meetings, index1, index2, time_period, "FCFS");
     return;
 }
 
 
 
-void SJF(int fd[13][2], char useful_inf[30], int read_data[8][5], char *command) {
+
+
+
+void SJF(char useful_inf[30], int read_data[8][5], char *command) {
     int i, j, k, l;
     int day1, day2, time_period=0;
 
     int rejectedMeetingCount = 0;
     int approvedMeetingCount = 0;
+
     /*
         Meeting arrays
         - set_meetings: approved meeting list
         - rejected_meetings: rejected meeting list
-
      */
 
     char set_meetings[162][5][1024];
@@ -871,6 +1023,9 @@ void SJF(int fd[13][2], char useful_inf[30], int read_data[8][5], char *command)
         }
     }
 
+    char check_origin[10];
+    strcpy(check_origin, command);
+    check_origin[strlen(check_origin)] = '\0';
 
     // 1. read input file
     FILE *fp;
@@ -916,8 +1071,9 @@ void SJF(int fd[13][2], char useful_inf[30], int read_data[8][5], char *command)
             strcpy(meeting_data[idx][4], endTime);        
             idx++;
 
+        }else{
+            continue;
         }
-    else{continue;}
     } // end of reading function
     fclose(fp);
 
@@ -929,31 +1085,34 @@ void SJF(int fd[13][2], char useful_inf[30], int read_data[8][5], char *command)
     char start_date[11];
     char end_date[11];
     char num_days[5];
-    strncpy(start_date, useful_inf, 10);   //record the starting date
-    start_date[strlen(start_date)] = '\0';
-    strncpy(end_date, useful_inf + 11, 10);    //record the end date
+
+    strcpy(start_date, "2022-04-25");  //record the starting date
+    strcpy(end_date, "2022-05-14");   //record the end date   
+    start_date[strlen(start_date)] = '\0';    
     end_date[strlen(end_date)] = '\0';
-    
-    printf("useful_inf %s\n", useful_inf);
-    printf("start %s end %s\n", start_date, end_date);
-    //Finding the no of days for the scheduling
-    strncpy(num_days, start_date+8, 2);
-    num_days[strlen(num_days)] = '\0';
-    day1 = atoi(num_days);
 
-    strncpy(num_days, end_date+8, 2);
-    num_days[strlen(num_days)] = '\0';
-    day2 = atoi(num_days);
-    printf("start+8 %s end+8 %s\n", start_date+8, end_date+8);
 
-    printf("day1 %d day2 %d\n", day1, day2);
+    if(strcmp(check_origin, "MAR") != 0){
+        strncpy(start_date, useful_inf, 10);   //record the starting date
+        start_date[strlen(start_date)] = '\0';
+        strncpy(end_date, useful_inf + 11, 10);    //record the end date
+        end_date[strlen(end_date)] = '\0';
 
-    if(day2 >= day1){
-        time_period = ((day2 - day1) + 1) * 9;
-    }else{
-        time_period = ((30 - day1 + 1) + day2) * 9;
-    };
+        //Finding the no of days for the scheduling
+        strncpy(num_days, start_date+8, 2);
+        num_days[strlen(num_days)] = '\0';
+        day1 = atoi(num_days);
 
+        strncpy(num_days, end_date+8, 2);
+        num_days[strlen(num_days)] = '\0';
+        day2 = atoi(num_days);
+
+        if(day2 >= day1){
+            time_period = ((day2 - day1) + 1) * 9;
+        }else{
+            time_period = ((30 - day1 + 1) + day2) * 9;
+        }
+    }
 
     /**
      * Compare Meeting lists
@@ -1014,8 +1173,6 @@ void SJF(int fd[13][2], char useful_inf[30], int read_data[8][5], char *command)
             }
         }
     }
-    
-
     
     /**
      * sort based on the date
@@ -1146,147 +1303,22 @@ void SJF(int fd[13][2], char useful_inf[30], int read_data[8][5], char *command)
             endTime = atoi(meeting_data[i][4]);
         }
 
-        
-    
-        
     }
-
-    printf("accepted meeting\n");
-    for (i = 0; i<approvedMeetingCount; i++){
-        for (j = 0; j<5; j++){
-            printf("%s ", set_meetings[i][j]);
-        }
-        printf("\n");
-    }
-
-    char check_origin[10];
-    strcpy(check_origin, command);
-    check_origin[strlen(check_origin)] = '\0';
-
 
     // approvedMeeting : number of meeting - rejected meeting
     approvedMeetingCount = idx - rejectedMeetingCount;
 
     if(strcmp(check_origin, "SAR") == 0){    //For part 3c
-        analyse_attendance(start_date, end_date, time_period, read_data, set_meetings, rejected_meetings, approvedMeetingCount, rejectedMeetingCount, "SJF");
+        analyse_attendance(useful_inf, start_date, end_date, time_period, read_data, set_meetings, rejected_meetings, approvedMeetingCount, rejectedMeetingCount, "SJF");
         return;
     }
-    if(strcmp(check_origin, "MAR") == 0){    //For part 3b
-
-    }
-    
-    print_schedule(fd, read_data, set_meetings, rejected_meetings,  approvedMeetingCount, rejectedMeetingCount, time_period, "SJF");
-    return;
-}
-
-
-
-
-void analyse_attendance(char start_date[11], char end_date[11], int time_period, int read_data[8][5], char accepted_meetings[162][5][1024], char rejected_meetings[162][5][1024], int index1, int index2, char *algorithm) {
-    int i, j, k, l;
-    int accepted_length, rejected_length; //number of scheduled and rejected requests
-    int staffHour, team_no, total_meeting;
-    float attendance;
-    float max_attendance = 0.0, min_attendance = 100.0; 
-    float attendance_rate[8];
-    char staffName[8][10] = {"Alan", "Billy", "Cathy", "David", "Eva", "Fanny", "Gary", "Helen"};
-
-    accepted_length = index1;
-    rejected_length = index2; 
-
-    FILE *fp;
-    fp = fopen("SAR.txt", "w+");
-    if (fp == NULL) {
-        fprintf(stderr, "Failed to open the file");
+    if(strcmp(check_origin, "MAR") == 0){    //For part 2c
+        meeting_attendance_request(start_date, end_date, read_data, set_meetings, rejected_meetings, approvedMeetingCount, rejectedMeetingCount, "SJF");
         return;
     }
-
-    fprintf(fp, "*** Staff Attendance Report *** \n\n");
-    fprintf(fp, "Algorithm used: %s \n", algorithm);
-    fprintf(fp, "====================================================================================== \n");  
-
-    for (i = 0; i < 8; i++) {
-        fprintf(fp, "Staff: %s \n\n", staffName[i]);
-        team_no = 0;
-        staffHour = 0;
-        total_meeting = 0;
-
-        for(l=0; l<accepted_length; l++){
-            int num = accepted_meetings[l][1][5] - 'A';
-            for(j=0; j<5; j++){
-                if(read_data[i][j] != -1){
-                    team_no++;
-                }
-            }
-            for(k=0; k<5; k++){
-                if(read_data[i][k] == -1){
-                    continue;
-                }
-                else if(read_data[i][k] == num){
-                    j=0;
-                    staffHour += atoi(accepted_meetings[l][j+3]); 
-                    total_meeting++;
-                    break;
-                }
-            }
-        }
-        attendance = ((float)staffHour / (float)time_period) * 100.0;
-        attendance_rate[i] = attendance;
-        // if(attendance >= max_attendance){
-        //     max_attendance = attendance;
-        //     strcpy(max_staff, staffName[i]);
-        // }
-        // if(attendance <= min_attendance){
-        //     min_attendance = attendance;
-        //     strcpy(min_staff, staffName[i]);
-        // }
-
-        fprintf(fp, "%s will attend a total of %d meetings as being part of %d different teams\n", staffName[i], total_meeting, team_no);
-        fprintf(fp, "%s will have an attendace rate of %.1f%% during the time period from %s to %s\n\n", staffName[i], attendance, start_date, end_date);
-    }  
-    fprintf(fp, "====================================================================================== \n");
-
-    float temp;
-    char temp_staff[10];
-    char temp_staffName[8][10] = {"Alan", "Billy", "Cathy", "David", "Eva", "Fanny", "Gary", "Helen"};
-    for(i=0; i<8; i++){
-        for(j=i+1; j<8; j++){
-            if(attendance_rate[j] < attendance_rate[i]){
-                temp = attendance_rate[i];
-                attendance_rate[i] = attendance_rate[j];
-                attendance_rate[j] = temp;
-
-                strcpy(temp_staff, temp_staffName[i]);
-                strcpy(temp_staffName[i], temp_staffName[j]);
-                strcpy(temp_staffName[j], temp_staff);
-            }
-        }
-    }
-
-    max_attendance = attendance_rate[7];
-    min_attendance = attendance_rate[0];
-
-    fprintf(fp, "The attendance rates of all the staff from highest to lowest are as follows:\n\n");
-    for(i=0; i<8; i++){
-        fprintf(fp, "Staff: %s, Attendance rate: %.1f%%\n", temp_staffName[i], attendance_rate[i]);
-    }
-    fprintf(fp, "====================================================================================== \n");
-    fprintf(fp, "\nHere, Staff %s has the highest attendance rate of %.1f%% out of everybody else\n", temp_staffName[7], max_attendance);
-    fprintf(fp, ">>>>>> There is a very high chance that %s will always arrive at the meetings on time, and may never be late or not show up\n", temp_staffName[7]);
-    fprintf(fp, ">>>>>> And this might also be an indication that %s might be the best performing member in all of the project teams that he is a part of\n\n", temp_staffName[7]);
-   
-    fprintf(fp, "====================================================================================== \n");
-    fprintf(fp, "\nHere, Staff %s has the lowest attendance rate of %.1f%% out of everybody else\n", temp_staffName[0], min_attendance);
-    fprintf(fp, ">>>>>> There is a very high chance that %s will always arrive late at the meetings and very rarely show up on time\n", temp_staffName[0]);
-    fprintf(fp, ">>>>>> And this might also be an indication that %s might be the worst performing member in all of the project teams that he is a part of\n\n", temp_staffName[0]);   
-    fprintf(fp, "====================================================================================== \n");
-
-
-    //SJF(toParent, useful_inf, read_data, "SAR");
-
+    print_schedule(read_data, set_meetings, rejected_meetings,  approvedMeetingCount, rejectedMeetingCount, time_period, "SJF");
     return;
 }
-
 
 
 
@@ -1296,45 +1328,6 @@ int extract_int(char *s, int start, int len) {
     ss[len] = 0;
     return atoi(ss);
 }
-
-
-int year(int yr) {
-    if ((yr % 400 == 0) || (yr % 100 != 0 && yr % 4 == 0))
-        return 1;
-    else
-        return 0;
-}
-
-
-int month(int yr, int mth) {
-    int days[13] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-    if (mth != 2)
-        return days[mth];
-    else
-        return days[mth] + year(yr);
-}
-
-
-bool is_valid_day(char *s1) {
-    int yr, mth, dy;
-    int mth_and_day;
-    yr = extract_int(s1, 0, 4);
-    mth = extract_int(s1, 5, 2);
-    dy = extract_int(s1, 8, 2);
-    if (yr != 2022) {
-        return false;
-    }
-    mth_and_day = mth * 100 + dy;
-    if (mth_and_day < 415 || mth_and_day > 514) {
-        return false;
-    } else {
-        if (mth_and_day == 417 || mth_and_day == 424 || mth_and_day == 501 || mth_and_day == 508 || mth_and_day == 515) {
-            return false;
-        }
-    }
-    return true;
-}
-
 
 bool is_valid_time(char *s1) {
     int time;
@@ -1350,109 +1343,6 @@ bool is_valid_duration(int x){
         return false;
     }
     return true;
-}
-
-
-int day(char *s1, char *s2) {
-
-    int yr1, mth1, dy1;
-    int yr2, mth2, dy2;
-    int d_yr = 0, d_mth = 0, d_dy = 0;
-
-    yr1 = extract_int(s1, 0, 4);
-    mth1 = extract_int(s1, 5, 2);
-    dy1 = extract_int(s1, 8, 2);
-
-    yr2 = extract_int(s2, 0, 4);
-    mth2 = extract_int(s2, 5, 2);
-    dy2 = extract_int(s2, 8, 2);
-
-    if ((yr1 > yr2) || (yr1 == yr2 && mth1 > mth2) || (yr1 == yr2 && mth1 == mth2 && dy1 > dy2))
-        return -1;
-
-    if (mth1 > 12 || mth2 > 12 || month(yr1, mth1) < dy1 || month(yr2, mth2) < dy2)
-        return -1;
-
-    int i;
-
-    for (i = yr1 + 1; i <= yr2 - 1; i++) {
-        d_yr = d_yr + 365 + year(i);
-    }
-
-    if (yr1 == yr2) {
-        for (i = mth1; i < mth2; i++)
-            d_mth = d_mth + month(yr1, i);
-    } else {
-        for (i = mth1; i <= 12; i++) {
-            d_mth = d_mth + month(yr1, i);
-        }
-        for (i = 1; i < mth2; i++) {
-            d_mth = d_mth + month(yr2, i);
-        }
-    }
-
-    if (yr1 == yr2 && mth1 == mth2) {
-        d_dy = dy2 - dy1 + 1;
-    } else {
-        d_dy = -dy1 + 1 + dy2;
-    }
-
-    return d_yr + d_mth + d_dy;
-}
-
-
-char *IntToString(int num, char *str) {
-    int length = 0;
-    do {
-        str[length] = num % 10 + 48;
-        length++;
-        num /= 10;
-    } while (num != 0);
-
-    int j = 0;
-    str[length] = '\0';
-    for (; j < length / 2; j++) {
-        char temp;
-        temp = str[j];
-        str[j] = str[length - 1 - j];
-        str[length - 1 - j] = temp;
-    }
-    return str;
-}
-
-
-char *IntToDay(char *startDate, int start, int num) {
-    char FIRST_DAY[11] = "xxxx-01-01";
-    char year[4];
-    int YEAR, days = 365, i = 0, thisDate, j;
-    int month[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-    char mon[12][3] = {"01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"};
-    char day[31][3] = {"01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"};
-    for (j = 0; j < 4; j++) {
-        FIRST_DAY[j] = startDate[j];
-        year[j] = startDate[j];
-    }
-    YEAR = atoi(year);
-    if (start == -1) printf("The date is illegal. Please reenter the comment.\n");
-    else {
-        thisDate = start + num;
-        if (YEAR % 4 == 0) {
-            days += 1;
-            month[1] = 29;
-        }
-        if (start + num <= days) {
-            i = 0;
-            while (thisDate > month[i]) {
-                thisDate -= month[i];
-                i++;
-            }
-            for (j = 0; j < 2; j++) startDate[j + 5] = mon[i][j];
-            for (j = 0; j < 2; j++) startDate[j + 8] = day[thisDate - 1][j];
-        } else {
-            printf("The date is illegal. Please reenter the comment.\n");
-        }
-    }
-    return startDate;
 }
 
 char **split(char *str, char *delimiter) {
@@ -1482,8 +1372,12 @@ char **split(char *str, char *delimiter) {
 }
 
 
-void print_schedule(int fd[13][2], int read_data[8][5], char accepted_meetings[162][5][1024], char rejected_meetings[162][5][1024], int accepted_length, int rejected_length, int time_peroid, char *algorithm) {    
+void print_schedule(int read_data[8][5], char accepted_meetings[162][5][1024], char rejected_meetings[162][5][1024], int index1, int index2, int time_peroid, char *algorithm) {    
     int i, j, k, l;
+    int accepted_length, rejected_length; //number of scheduled and rejected requests
+
+    accepted_length = index1;
+    rejected_length = index2;
 
     int total_length = accepted_length + rejected_length;
 
@@ -1495,16 +1389,13 @@ void print_schedule(int fd[13][2], int read_data[8][5], char accepted_meetings[1
     FILE *fp;
     char filename[30];
 
-    // increment file print count
-    if (strcmp(algorithm, "FCFS") == 0){
-        sprintf(filename, "Schedule_%s_%02d.txt",algorithm, file_print[0]);
-        file_print[0]++;
-    }else if (strcmp(algorithm, "SJF") == 0){
-        sprintf(filename, "Schedule_%s_%02d.txt",algorithm, file_print[1]);
-        file_print[1]++;
-    }
+    int result = sprintf(filename, "Schedule_%s_%02d.txt",algorithm, file_num);
 
-    fp = fopen(filename,"w+");
+    int teams[5];
+
+    file_num++;
+    
+    fp = fopen(filename, "w+");
     if (fp == NULL) {
         fprintf(stderr, "Failed to open the file");
         // return 1;
@@ -1558,19 +1449,13 @@ void print_schedule(int fd[13][2], int read_data[8][5], char accepted_meetings[1
 
     int accepted_hours=0;
     int rejected_hours=0;
-
-    printf("acceted meetings\n");
     for (i = 0; i < accepted_length; i++){
-        printf("%s ", accepted_meetings[i][3]);
         accepted_hours += atoi(accepted_meetings[i][3]);
     }
-    printf("\nrejected meetings\n");
     for (i = 0; i < rejected_length; i++){
-        printf("%s ", rejected_meetings[i][3]);
         rejected_hours += atoi(rejected_meetings[i][3]);
     }
-    printf("\n");
-    printf("time period %d\n", time_peroid);
+
 
     float total_utilization = ((float)(accepted_hours + rejected_hours) / (float)time_peroid) * 100.0; 
     float accepted_utilization = ((float)accepted_hours / (float)time_peroid) * 100.0;
@@ -1610,32 +1495,4 @@ void print_schedule(int fd[13][2], int read_data[8][5], char accepted_meetings[1
     printf("Printed. Export file name: %s\n", filename);
 
     return;
-}
-
-
-
-void test_cp_func(struct Staff *staff, struct Project *project) {
-    int i, k;
-    sleep(2);
-    printf("\n\n\n");
-    printf("STAFF INFO\n----------\n");
-    for (i = 0; i < 8; ++i) {
-        printf("Staff %d %s is manager of %d\n", i, staffName[i], staff[i].Manager);
-        for (k = 0; k < staff[i].attend_team_number; ++k) {
-            printf("Works on the project: %d\n", staff[i].Project[k]);
-            printf("Works on the team: %d\n", staff[i].Team[k]);
-        }
-        printf("***************\n");
-    }
-
-    printf("\n\n\n");
-
-    printf("PROJECT INFO\n------------\n");
-    for (i = 0; i < 5; ++i) {
-        printf("Project %d\n", i);
-        for (k = 0; k < project[i].Staff_number; ++k) {
-            printf("%d ", project[i].Member[k]);
-        }
-        printf("***************\n");
-    }
 }
