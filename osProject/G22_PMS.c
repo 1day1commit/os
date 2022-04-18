@@ -353,17 +353,43 @@ void create_project_team(int fd[13][2], char *command, int len, int read_manager
         }
         i++;
     }
-
+    int infosize = i;
     int manager = useful_inf[2] - 'A'; // 
     int team = useful_inf[0] - 'A'; //
     int project = useful_inf[1] - 'A'; //
     int team_no=0;
-
-/*
+    
+    /*
     Check staff occupy
-     */
+    */
+    
+    // 1. check if the prompt consists of more than 4 members.
+    if (infosize > 6){
+        if (infosize == 3) {
+            printf("Project Team must be consists of at least one project member.\n");
+        }
+        else {
+            printf("Project team can not be consists of more than 4 staff members.\n");
+        }
+        return;
+    }
+    
+    // 2. check if the prompt consists of duplicate information.
+    for (i = 0; i < infosize; ++i) {
+        for (j = i+1 ; j < infosize; ++j) {
+            if ( strncmp(res[i],res[j], strlen(res[i])) == 0 ) {
+                if (i == 2) {
+                    printf("Manager cannot be a project member of the team.\n");
+                }
+                else {
+                    printf("Prompt consists of duplicate elements. Please try again!\n");
+                }
+                return;
+            }
+        }
+    }
 
-    // 1. check if the manager is the manager of other project
+    // 3. check if the manager is the manager of other project
     //printf("manager %d team %d\n", manager, team);
     //printf("read_manager[manager] %d\n", read_manager[manager]);
     if (read_manager[manager] != -1){
@@ -373,7 +399,7 @@ void create_project_team(int fd[13][2], char *command, int len, int read_manager
     }
     
 
-    // 2. check staff member participation count
+    // 4. check staff member participation count
     // if manager is already participated in 3 projects,
 
     if(proj_participation[manager] >= 3){
