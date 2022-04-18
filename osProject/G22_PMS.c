@@ -40,6 +40,7 @@ char find_managers[3] = {'f', 'm', 0};
 int extract_int(char *s, int start, int len);
 bool is_valid_time(char *s1);
 bool is_valid_duration(int x);
+bool is_valid_day(char *s1);
 char **split(char *str, char *delimiter);
 
 
@@ -479,10 +480,10 @@ int single_input_meeting_request(int fd[13][2], char useful_inf[30]) {
     strncpy(day, useful_inf + 7, 10);
     strncpy(start_time, useful_inf + 18, 5);
     strncpy(hours, useful_inf + 24, 1);
-    // if (!is_valid_day(day)) {
-    //     printf("It has an invalid date\n");
-    //     return -1;
-    // }
+    if (!is_valid_day(day)) {
+        printf("It has an invalid date\n");
+        return -1;
+    }
     if (!is_valid_time(start_time)) {
         printf("It has an invalid start time\n");
         return -1;
@@ -1532,4 +1533,24 @@ void print_schedule(int read_data[8][5], char accepted_meetings[162][5][1024], c
     printf("Printed. Export file name: %s\n", filename);
 
     return;
+}
+
+bool is_valid_day(char *s1) {
+    int yr, mth, dy;
+    int mth_and_day;
+    yr = extract_int(s1, 0, 4);
+    mth = extract_int(s1, 5, 2);
+    dy = extract_int(s1, 8, 2);
+    if (yr != 2022) {
+        return false;
+    }
+    mth_and_day = mth * 100 + dy;
+    if (mth_and_day < 415 || mth_and_day > 514) {
+        return false;
+    } else {
+        if (mth_and_day == 417 || mth_and_day == 424 || mth_and_day == 501 || mth_and_day == 508 || mth_and_day == 515) {
+            return false;
+        }
+    }
+    return true;
 }
