@@ -50,6 +50,8 @@ Test command:
 
 Team_A Project_A Alan Cathy Fanny Helen
 
+Team_B Project_A Cathy Fanny Helen
+
 Team_B Project_B Cathy Billy David
 
 Team_C Project_C Eva Fanny Helen
@@ -81,3 +83,7 @@ Gurkan 4.10 work commit: Since the program requires a lot of memory to debug, ad
 ZhangXinyu 4.10 work commit: fix a huge bug which is not closed all processes at the end
 
 ZhangXinyu 4.16 work commit: add mananger to Project struct
+
+ZhangXinyu 4.16 work commit: fix file not read bug in batch_input_meeting_request function
+
+ZhangXinyu 4.18 work commit: add team checking and same project checking

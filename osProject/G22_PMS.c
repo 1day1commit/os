@@ -54,6 +54,8 @@ void analyse_attendance(char useful_inf[30], char start_date[11], char end_date[
 
 // Project staff count
 int proj_participation[8] = {0,0,0,0,0,0,0,0};
+int is_team_created[5] = {0,0,0,0,0};
+int is_project_created[5] = {0,0,0,0,0};
 //Store Utilization from FCFS scheduling
 float store_util[2] = {0.0};
 int file_num = 1;
@@ -354,6 +356,7 @@ void create_project_team(int fd[13][2], char *command, int len, int read_manager
 
     int manager = useful_inf[2] - 'A'; // 
     int team = useful_inf[0] - 'A'; //
+    int project = useful_inf[1] - 'A'; //
     int team_no=0;
 
 /*
@@ -378,6 +381,15 @@ void create_project_team(int fd[13][2], char *command, int len, int read_manager
         return;          
     }      
 
+    if (is_team_created[team] != 0) {
+        printf("Team %c has already been created, try a different team\n\n", useful_inf[0]);
+        return;
+    }
+    
+    if (is_project_created[project] != 0) {
+        printf("Project %c has already been created, try a different project\n\n", useful_inf[1]);
+        return;
+    }
 
     // if staff is already participated in 3 projects,
     for (i = 0; i<3; i++){
@@ -394,6 +406,8 @@ void create_project_team(int fd[13][2], char *command, int len, int read_manager
     // if pass both requirements, can create project
     // increment project participation count for manager and count
     proj_participation[manager]++;
+    is_team_created[team] = 1;
+    is_project_created[project] = 1;
     for (i = 0; i<3; i++){
         int pos = useful_inf[3+i] - 'A';
         if (pos < 0) {continue;}
