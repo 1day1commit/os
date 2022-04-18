@@ -1,0 +1,134 @@
+*** Staff Attendance Report *** 
+
+Algorithm used: FCFS 
+====================================================================================== 
+Staff: Alan 
+
+Alan will attend a total of 9 meetings as being part of 3 different teams
+Alan will have an attendance rate of 16.1% during the time period from 2022-04-25 to 2022-05-14
+
+Staff: Billy 
+
+Billy will attend a total of 7 meetings as being part of 2 different teams
+Billy will have an attendance rate of 13.3% during the time period from 2022-04-25 to 2022-05-14
+
+Staff: Cathy 
+
+Cathy will attend a total of 9 meetings as being part of 3 different teams
+Cathy will have an attendance rate of 16.1% during the time period from 2022-04-25 to 2022-05-14
+
+Staff: David 
+
+David will attend a total of 5 meetings as being part of 2 different teams
+David will have an attendance rate of 10.0% during the time period from 2022-04-25 to 2022-05-14
+
+Staff: Eva 
+
+Eva will attend a total of 6 meetings as being part of 2 different teams
+Eva will have an attendance rate of 11.1% during the time period from 2022-04-25 to 2022-05-14
+
+Staff: Fanny 
+
+Fanny will attend a total of 4 meetings as being part of 1 different teams
+Fanny will have an attendance rate of 6.1% during the time period from 2022-04-25 to 2022-05-14
+
+Staff: Gary 
+
+Gary will attend a total of 4 meetings as being part of 1 different teams
+Gary will have an attendance rate of 7.2% during the time period from 2022-04-25 to 2022-05-14
+
+Staff: Helen 
+
+Helen will attend a total of 8 meetings as being part of 2 different teams
+Helen will have an attendance rate of 13.3% during the time period from 2022-04-25 to 2022-05-14
+
+====================================================================================== 
+The attendance rates of all the staff from lowest to highest are as follows:
+
+Staff: Fanny, Attendance rate: 6.1%
+Staff: Gary, Attendance rate: 7.2%
+Staff: David, Attendance rate: 10.0%
+Staff: Eva, Attendance rate: 11.1%
+Staff: Billy, Attendance rate: 13.3%
+Staff: Helen, Attendance rate: 13.3%
+Staff: Cathy, Attendance rate: 16.1%
+Staff: Alan, Attendance rate: 16.1%
+====================================================================================== 
+
+Here, Staff Alan has the highest attendance rate of 16.1% out of everybody else
+>>>>>> There is a very high chance that Alan will always arrive at the meetings on time, and may never be late or not show up
+>>>>>> And this might also be an indication that Alan might be the best performing member in all of the project teams that he is a part of
+
+====================================================================================== 
+
+Here, Staff Fanny has the lowest attendance rate of 6.1% out of everybody else
+>>>>>> There is a very high chance that Fanny will always arrive late at the meetings and very rarely show up on time
+>>>>>> And this might also be an indication that Fanny might be the worst performing member in all of the project teams that he is a part of
+
+====================================================================================== 
+Algorithm used: SJF 
+====================================================================================== 
+Staff: Alan 
+
+Alan will attend a total of 9 meetings as being part of 3 different teams
+Alan will have an attendance rate of 15.6% during the time period from 2022-04-25 to 2022-05-14
+
+Staff: Billy 
+
+Billy will attend a total of 7 meetings as being part of 2 different teams
+Billy will have an attendance rate of 12.2% during the time period from 2022-04-25 to 2022-05-14
+
+Staff: Cathy 
+
+Cathy will attend a total of 9 meetings as being part of 3 different teams
+Cathy will have an attendance rate of 15.6% during the time period from 2022-04-25 to 2022-05-14
+
+Staff: David 
+
+David will attend a total of 5 meetings as being part of 2 different teams
+David will have an attendance rate of 10.0% during the time period from 2022-04-25 to 2022-05-14
+
+Staff: Eva 
+
+Eva will attend a total of 6 meetings as being part of 2 different teams
+Eva will have an attendance rate of 10.0% during the time period from 2022-04-25 to 2022-05-14
+
+Staff: Fanny 
+
+Fanny will attend a total of 4 meetings as being part of 1 different teams
+Fanny will have an attendance rate of 5.6% during the time period from 2022-04-25 to 2022-05-14
+
+Staff: Gary 
+
+Gary will attend a total of 4 meetings as being part of 1 different teams
+Gary will have an attendance rate of 6.1% during the time period from 2022-04-25 to 2022-05-14
+
+Staff: Helen 
+
+Helen will attend a total of 8 meetings as being part of 2 different teams
+Helen will have an attendance rate of 11.7% during the time period from 2022-04-25 to 2022-05-14
+
+====================================================================================== 
+The attendance rates of all the staff from lowest to highest are as follows:
+
+Staff: Fanny, Attendance rate: 5.6%
+Staff: Gary, Attendance rate: 6.1%
+Staff: David, Attendance rate: 10.0%
+Staff: Eva, Attendance rate: 10.0%
+Staff: Helen, Attendance rate: 11.7%
+Staff: Billy, Attendance rate: 12.2%
+Staff: Cathy, Attendance rate: 15.6%
+Staff: Alan, Attendance rate: 15.6%
+====================================================================================== 
+
+Here, Staff Alan has the highest attendance rate of 15.6% out of everybody else
+>>>>>> There is a very high chance that Alan will always arrive at the meetings on time, and may never be late or not show up
+>>>>>> And this might also be an indication that Alan might be the best performing member in all of the project teams that he is a part of
+
+====================================================================================== 
+
+Here, Staff Fanny has the lowest attendance rate of 5.6% out of everybody else
+>>>>>> There is a very high chance that Fanny will always arrive late at the meetings and very rarely show up on time
+>>>>>> And this might also be an indication that Fanny might be the worst performing member in all of the project teams that he is a part of
+
+====================================================================================== 

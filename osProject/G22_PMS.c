@@ -355,7 +355,7 @@ void create_project_team(int fd[13][2], char *command, int len, int read_manager
     */
     
     // 1. check if the prompt consists of more than 4 members.
-    if (infosize > 6){
+    if (infosize > 6 || infosize == 3){
         if (infosize == 3) {
             printf("Project Team must be consists of at least one project member.\n");
         }

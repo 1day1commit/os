@@ -1,0 +1,61 @@
+*** Meeting Attendance Report *** 
+
+
+Algorithm used: FCFS 
+====================================================================================== 
+For Project Team_ A
+Team_A will have an average duration of 2.8 hours for each of their meetings
+
+For Project Team_ B
+Team_B will have an average duration of 3.2 hours for each of their meetings
+
+For Project Team_ C
+Team_C will have an average duration of 3.5 hours for each of their meetings
+
+For Project Team_ D
+Team_D will have an average duration of 3.7 hours for each of their meetings
+
+For Project Team_ E
+Team_E will have an average duration of 0.0 hours for each of their meetings
+
+====================================================================================== 
+Out of all the teams, Project Team_D will have the highest average duration of 3.7 hours for each of their meetings
+And, Project Team_A will have the lowest average duration of 2.8 hours for each of their meetings
+
+Algorithm used: SJF 
+====================================================================================== 
+For Project Team_ A
+Team_A will have an average duration of 2.5 hours for each of their meetings
+
+For Project Team_ B
+Team_B will have an average duration of 2.8 hours for each of their meetings
+
+For Project Team_ C
+Team_C will have an average duration of 3.5 hours for each of their meetings
+
+For Project Team_ D
+Team_D will have an average duration of 3.7 hours for each of their meetings
+
+For Project Team_ E
+Team_E will have an average duration of 0.0 hours for each of their meetings
+
+====================================================================================== 
+Out of all the teams, Project Team_D will have the highest average duration of 3.7 hours for each of their meetings
+And, Project Team_A will have the lowest average duration of 2.5 hours for each of their meetings
+====================================================================================== 
+Algorithm "FCFS" will have an utilization rate of 25.926% during the time period from 2022-04-25 to 2022-05-14
+
+Algorithm "SJF" will have an utilization rate of 24.074% during the time period from 2022-04-25 to 2022-05-14
+
+
+Algorithm "FCFS" rejected a total of 7 meetings during the time period from 2022-04-25 to 2022-05-14
+
+Algorithm "SJF" rejected a total of 7 meetings during the time period from 2022-04-25 to 2022-05-14
+
+
+Here, Algorithm "FCFS" has a higher utilization rate than Algorithm "SJF" in scheduling the meetings
+As a result, Algorithm "FCFS" is better in this instance to use, for achieving a higher time-slot utilization rate than Algorithm "SJF"
+
+Here, both of the Algorithm "FCFS" and Algorithm "SJF" rejected the same number of meetings
+
+====================================================================================== 
