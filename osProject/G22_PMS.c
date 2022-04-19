@@ -352,7 +352,7 @@ void create_project_team(int fd[13][2], char *command, int len, int read_manager
     int project = useful_inf[1] - 'A'; //
     int team_no=0;
 
-/*
+    /*
     Check staff occupy
      */
 
@@ -387,25 +387,26 @@ void create_project_team(int fd[13][2], char *command, int len, int read_manager
     for (i = 0; i<3; i++){
         // calculate the position of staff in array
         int pos = useful_inf[3+i] - 'A';
-        if (pos < 0){continue;}
         if (proj_participation[pos] >= 3){
             printf("Staff member %s is already a member of 3 other teams\n\n", staffName[pos]);
             return;
         }
     }
 
-
     // if pass both requirements, can create project
     // increment project participation count for manager and count
     proj_participation[manager]++;
     is_team_created[team] = 1;
     is_project_created[project] = 1;
+
+    int prev;
     for (i = 0; i<3; i++){
         int pos = useful_inf[3+i] - 'A';
-        if (pos < 0) {continue;}
-        proj_participation[pos]++;
+        if (prev != pos){
+            proj_participation[pos]++;
+        }
+        prev = pos;
     }
-   
 
     int useful_inf_len = 8;
     char to_member_message[10];
