@@ -555,9 +555,6 @@ int batch_input_meeting_request(int fd[13][2], char *command) {
     return line_num;
 }
 
-
-
-
 void meeting_attendance_request(char start_date[11], char end_date[11], int read_data[8][5], char accepted_meetings[162][5][1024], char rejected_meetings[162][5][1024], int accepted_length, int rejected_length, char *algorithm) {
     int i, j, k, l;
     int total_hours, total_meeting;
@@ -686,8 +683,6 @@ void meeting_attendance_request(char start_date[11], char end_date[11], int read
     fclose(fp);
     return;
 }
-
-
 
 void analyse_attendance(char useful_inf[30], char start_date[11], char end_date[11], int time_period, int read_data[8][5], char accepted_meetings[162][5][1024], char rejected_meetings[162][5][1024], int accepted_length, int rejected_length, char *algorithm) {
     int i, j, k, l;
@@ -967,7 +962,6 @@ void analyse_attendance(char useful_inf[30], char start_date[11], char end_date[
 }
 
 
-
 void FCFS(char useful_inf[30], int read_data[8][5], char *command) {
     int i, j, k, l, day1, day2, time_period=0;
     // 1. read input file
@@ -1221,9 +1215,6 @@ void FCFS(char useful_inf[30], int read_data[8][5], char *command) {
     return;
 }
 
-
-
-
 void SJF(char useful_inf[30], int read_data[8][5], char *command) {
     int i, j, k, l;
     int start_date_month, end_date_month, time_period=0;
@@ -1401,14 +1392,18 @@ void SJF(char useful_inf[30], int read_data[8][5], char *command) {
     /**
      * 
      * SORTING
+     * candidate_data[][0] = Team_X
+     * candidate_data[][1] = 2022-04-25
+     * candidate_data[][2] = 09:00
+     * candidate_data[][3] = 2
      * 
-     * sort based on the date
+     * sort based on the Duration
      */
 
     char temp[1024]; int day=0;
     for (i = 0; i<candidate; i++){
         for (j = i+1; j<candidate; j++){
-            if (strcmp(candidate_data[i][0], candidate_data[j][0]) > 0){
+            if (strcmp(candidate_data[i][3], candidate_data[j][3]) > 0){
                 // then swap
                 for (k = 0; k<5; k++){
                     strcpy(temp, candidate_data[i][k]);
@@ -1427,7 +1422,7 @@ void SJF(char useful_inf[30], int read_data[8][5], char *command) {
     for (i = 0; i<candidate; i++){
         for (j = i+1; j<candidate; j++){
             // should be from same day
-            if (strcmp(candidate_data[i][0], candidate_data[j][0]) == 0){
+            if (strcmp(candidate_data[i][3], candidate_data[j][3]) == 0){
                 if (strcmp(candidate_data[i][2], candidate_data[j][2]) > 0){
                     // then swap
 
@@ -1443,15 +1438,15 @@ void SJF(char useful_inf[30], int read_data[8][5], char *command) {
 
 
     /**
-     * sort based on duration of meeting
+     * sort based on duration of date
      */
     memset(temp, 0, sizeof(temp));
     for (i = 0; i<candidate; i++){
         for (j = i+1; j<candidate; j++){
             // should be from same day
-            if (strcmp(candidate_data[i][0], candidate_data[j][0]) == 0){
+            if (strcmp(candidate_data[i][3], candidate_data[j][3]) == 0){
                 if (strcmp(candidate_data[i][2], candidate_data[j][2]) == 0){
-                    if (strcmp(candidate_data[i][3], candidate_data[j][3]) > 0){
+                    if (strcmp(candidate_data[i][1], candidate_data[j][1]) > 0){
                         // then swap
                         for (k = 0; k<5; k++){
                             strcpy(temp, candidate_data[i][k]);
@@ -1473,10 +1468,10 @@ void SJF(char useful_inf[30], int read_data[8][5], char *command) {
     for (i = 0; i<candidate; i++){
         for (j = i+1; j<candidate; j++){
             // should be from same day
-            if (strcmp(candidate_data[i][0], candidate_data[j][0]) == 0){
+            if (strcmp(candidate_data[i][3], candidate_data[j][3]) == 0){
                 if (strcmp(candidate_data[i][2], candidate_data[j][2]) == 0){
-                    if (strcmp(candidate_data[i][3], candidate_data[j][3]) == 0){
-                         if (strcmp(candidate_data[i][1], candidate_data[j][1]) > 0){
+                    if (strcmp(candidate_data[i][1], candidate_data[j][1]) == 0){
+                         if (strcmp(candidate_data[i][0], candidate_data[j][0]) > 0){
                             // then swap
                             for (k = 0; k<5; k++){
                                 strcpy(temp, candidate_data[i][k]);
