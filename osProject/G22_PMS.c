@@ -322,7 +322,7 @@ void create_project_team(int fd[13][2], char *command, int read_manager[8], int 
     char useful_inf[6];
     char **res = split(command, " ");
     int i = 0;
-    int count_staff=0;
+    int count_staff=0; // count number of staffs in project
 
     while (res[i] != NULL) {
         if(i > 2){
@@ -338,9 +338,9 @@ void create_project_team(int fd[13][2], char *command, int read_manager[8], int 
         i++;
     }
 
-    int manager = useful_inf[2] - 'A';//
-    int team = useful_inf[0] - 'A';   //
-    int project = useful_inf[1] - 'A';//
+    int manager = useful_inf[2] - 'A';
+    int team = useful_inf[0] - 'A';
+    int project = useful_inf[1] - 'A';
 
     /*
     Check staff occupy
@@ -434,9 +434,7 @@ int single_input_meeting_request(int fd[13][2], char useful_inf[30]) {
     strcpy(start_date, "2022-04-25");//record the starting date
     strcpy(end_date, "2022-05-14");  //record the end date
     len = strlen(start_date);
-    start_date[len - 1] = '\0';
     len = strlen(end_date);
-    end_date[len - 1] = '\0';
 
     strncpy(team, useful_inf + 5, 1);
     strncpy(day, useful_inf + 7, 10);
@@ -450,6 +448,7 @@ int single_input_meeting_request(int fd[13][2], char useful_inf[30]) {
         printf("It has an invalid start time\n");
         return -1;
     }
+    
     if (strcmp(day, start_date) < 0 || strcmp(day, end_date) > 0) {
         printf("It has an invalid date\n");
         return -1;
