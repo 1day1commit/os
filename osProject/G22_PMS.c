@@ -482,7 +482,7 @@ int batch_input_meeting_request(int fd[13][2], char *command) {
     char buf[MAX_LINE];
     char use_inf[30];
     FILE *fp;
-    useful_inf[strlen(useful_inf) - 1] = '\0';//Maybe not -1//
+    useful_inf[strlen(useful_inf) - 1] = '\0';
     if ((fp = fopen(useful_inf, "r")) == NULL) {
         printf("fail to read the file\n");
         return -1;
@@ -490,9 +490,8 @@ int batch_input_meeting_request(int fd[13][2], char *command) {
 
     while (fgets(buf, MAX_LINE, fp) != NULL) {
         len = strlen(buf);
-        buf[len] = '\0';//Maybe not -1//
+        buf[len] = '\0';
         strcpy(use_inf, buf);
-        //strcat(toInputFile, use_inf);
         if (single_input_meeting_request(fd, use_inf) > 0) {
             line_num++;
         } else {
@@ -776,10 +775,9 @@ void analyse_attendance(char useful_inf[30], char start_date[11], char end_date[
         fprintf(fp, "\nHere, Staff %s has the highest attendance rate of %.1f%% out of everybody else\n", temp_staffName[7], max_attendance);
         fprintf(fp, ">>>>>> The meeting schedules for %s has been well distributed.\n", temp_staffName[7]);
 
-
         fprintf(fp, "====================================================================================== \n");
         fprintf(fp, "\nHere, Staff %s has the lowest attendance rate of %.1f%% out of everybody else\n", temp_staffName[0], min_attendance);
-        fprintf(fp, ">>>>>> There are many time conflicts in meeting schedules for %s. Possibly because %s is doing too much work compared to others by having numerous meetings and participating in many projects.\n", temp_staffName[0], temp_staffName[0]);
+        fprintf(fp, ">>>>>> There are many time conflicts in meeting schedules for %s. Possibly because %s is doing too much work compared to others members by having numerous meetings and participating in many projects.\n", temp_staffName[0], temp_staffName[0]);
         fprintf(fp, ">>>>>> It is advised to reduce the number of meetings for %s, or have a short meeting.\n", temp_staffName[0]);
 
         fprintf(fp, "====================================================================================== \n");
@@ -823,9 +821,12 @@ void analyse_attendance(char useful_inf[30], char start_date[11], char end_date[
         fprintf(fp, "%s have the identical lowest rate of %.1f%%\n", temp_staffName[0], min_attendance);
 
 
-        //
-        // print analysis
-        //
+        /**
+         * 
+         * Print Analysis
+         * 
+         * */
+
         // if there are more people with the lowest attendance rate
         if (min_dup_count > max_dup_count) {
             fprintf(fp, ">>>>>> There are more staffs with the lowest attendance_ ate than the highest.\n");
@@ -837,7 +838,7 @@ void analyse_attendance(char useful_inf[30], char start_date[11], char end_date[
                 }
             }
             // print last one
-            fprintf(fp, "%s belongs to.\n", temp_staffName[0]);
+            fprintf(fp, "%s belongs to. Otherwise, it is advised to find the better time-slot for meetings.\n", temp_staffName[0]);
         }
 
 
