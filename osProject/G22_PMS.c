@@ -315,13 +315,13 @@ int main() {
     return 0;
 }
 
+
 void create_project_team(int fd[13][2], char *command, int read_manager[8], int read_data[8][5]) {
     char staffName[8][10] = {"Alan", "Billy", "Cathy", "David", "Eva", "Fanny", "Gary", "Helen"};
     char teamName[5][10] = {"Team_A", "Team_B", "Team_C", "Team_D", "Team_E"};
     char useful_inf[6];
     char **res = split(command, " ");
-    int i=0, j=0;
-    int k, n;
+    int i = 0;
     int count_staff=0;
 
     while (res[i] != NULL) {
@@ -332,83 +332,74 @@ void create_project_team(int fd[13][2], char *command, int read_manager[8], int 
             useful_inf[i] = res[i][5];
         } else if (i == 1) {
             useful_inf[i] = res[i][8];
-        } else {
+        } else{
             useful_inf[i] = res[i][0];
         }
         i++;
     }
 
-    int manager = useful_inf[2] - 'A'; // 
-    int team = useful_inf[0] - 'A'; //
-    int project = useful_inf[1] - 'A'; //
-    int team_no=0;
+    int manager = useful_inf[2] - 'A';//
+    int team = useful_inf[0] - 'A';   //
+    int project = useful_inf[1] - 'A';//
 
     /*
     Check staff occupy
-    */
+     */
 
     // 1. check if the manager is the manager of other project
-    //printf("manager %d team %d\n", manager, team);
-    //printf("read_manager[manager] %d\n", read_manager[manager]);
-    if (read_manager[manager] != -1){
+    if (read_manager[manager] != -1) {
         // if not -1, it is already a manager of other project
         printf("Staff member %s is already a manager of %s\n\n", staffName[manager], teamName[read_manager[manager]]);
         return;
     }
-    
+
 
     // 2. check staff member participation count
-    // if manager is already participated in 3 projects,
-
-    if(proj_participation[manager] >= 3){
+    // if manager is already participating in 3 projects,
+    if (proj_participation[manager] >= 3) {
         printf("Staff member %s is already a member of 3 other teams\n\n", staffName[manager]);
-        return;          
-    }      
+        return;
+    }
 
+    // 3. Check if the team has already been created
     if (is_team_created[team] != 0) {
         printf("Team %c has already been created, try a different team\n\n", useful_inf[0]);
         return;
     }
-    
+
+    // 4. Check if the project has already been created
     if (is_project_created[project] != 0) {
         printf("Project %c has already been created, try a different project\n\n", useful_inf[1]);
         return;
     }
 
-    // if staff is already participated in 3 projects,
-    for (i = 0; i<count_staff; i++){
+    // if staff is already participating in 3 projects,
+    for (i = 0; i < count_staff; i++) {
         // calculate the position of staff in array
-        int pos = useful_inf[3+i] - 'A';
-        if (pos < 0){continue;}
-        if (proj_participation[pos] >= 3){
+        int pos = useful_inf[3 + i] - 'A';
+        if (proj_participation[pos] >= 3) {
             printf("Staff member %s is already a member of 3 other teams\n\n", staffName[pos]);
             return;
-        }//printf("participation count for %s is %d\n", staffName[pos], proj_participation[pos]);
+        }
     }
-
 
     // if pass both requirements, can create project
     // increment project participation count for manager and count
     proj_participation[manager]++;
     is_team_created[team] = 1;
     is_project_created[project] = 1;
+
     for (i = 0; i<count_staff; i++){
         int pos = useful_inf[3+i] - 'A';
         if (pos < 0) {continue;}
         proj_participation[pos]++;
     }
 
-    // for(i=0; i<8; i++){
-    //     printf("for i: %d, value is %d\n", i, proj_participation[i]);
-    // }
-    // printf("\n");
-   
-
     int useful_inf_len = 8;
     char to_member_message[10];
     char to_manager_message[10];
     char to_project_message[10];
-    char temp[3] = {'\0', '\0', '\0'};
+    char temp[5] = {'\0', '\0', '\0', '\0', '\0'};
     char manager_message[3] = "MM";
     strcpy(to_member_message, create_pro_team);
     strcpy(to_manager_message, create_pro_team); //cp
@@ -417,19 +408,20 @@ void create_project_team(int fd[13][2], char *command, int read_manager[8], int 
     temp[1] = useful_inf[1];
     strcat(to_manager_message, temp); //Team Initial project initial
     strcat(to_manager_message, manager_message); 
-    strncpy(temp, useful_inf + 2, i - 2);
+    strncpy(temp, useful_inf + 2, useful_inf_len - 2);
     strcat(to_project_message, temp);
     for (i = 2; i < useful_inf_len; i++) {
         if (i == 2) {
-            write(fd[useful_inf[i] - 'A'][1], to_manager_message, strlen(to_manager_message) + 1);    //need to add the null character
+            write(fd[useful_inf[i] - 'A'][1], to_manager_message, strlen(to_manager_message) + 1);//need to add the null character
         } else {
-            write(fd[useful_inf[i] - 'A'][1], to_member_message, strlen(to_member_message) + 1);     //need to add the null character
+            write(fd[useful_inf[i] - 'A'][1], to_member_message, strlen(to_member_message) + 1);//need to add the null character
         }
     }
     write(fd[useful_inf[1] - 'A' + 8][1], to_project_message, strlen(to_project_message) + 1);
     sleep(1);
     printf("\n>>>>>> Project Team %c is created.\n", res[0][5]);
 }
+
 
 int single_input_meeting_request(int fd[13][2], char useful_inf[30]) {
     FILE *input_file;
