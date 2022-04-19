@@ -448,7 +448,7 @@ int single_input_meeting_request(int fd[13][2], char useful_inf[30]) {
         printf("It has an invalid start time\n");
         return -1;
     }
-    
+
     if (strcmp(day, start_date) < 0 || strcmp(day, end_date) > 0) {
         printf("It has an invalid date\n");
         return -1;
@@ -1648,10 +1648,10 @@ bool is_valid_day(char *s1) {
         return false;
     }
     mth_and_day = mth * 100 + dy;
-    if (mth_and_day < 415 || mth_and_day > 514) {
+    if (mth_and_day < 425 || mth_and_day > 514) {
         return false;
     } else {
-        if (mth_and_day == 417 || mth_and_day == 424 || mth_and_day == 501 || mth_and_day == 508 || mth_and_day == 515) {
+        if (mth_and_day == 431 || mth_and_day == 430 || mth_and_day == 501 || mth_and_day == 507 || mth_and_day == 508 || mth_and_day == 514) {
             return false;
         }
     }
