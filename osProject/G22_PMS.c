@@ -1357,7 +1357,6 @@ void SJF(char useful_inf[30], int read_data[8][5], char *command) {
             if (strcmp(candidate_data[i][3], candidate_data[j][3]) == 0) {
                 if (strcmp(candidate_data[i][2], candidate_data[j][2]) > 0) {
                     // then swap
-
                     for (k = 0; k < 5; k++) {
                         strcpy(temp, candidate_data[i][k]);
                         strcpy(candidate_data[i][k], candidate_data[j][k]);
@@ -1549,7 +1548,6 @@ void print_schedule(int read_data[8][5], char accepted_meetings[162][5][1024], c
         accepted_hours += atoi(accepted_meetings[i][3]);
     }
 
-    // float total_rates = ((float)(accepted_hours + rejected_hours) / (float)time_period) * 100.0;
     float accepted_rates = ((float) accepted_length / (float) total_length) * 100;
     float rejected_rates = ((float) rejected_length / (float) total_length) * 100;
 
@@ -1564,8 +1562,6 @@ void print_schedule(int read_data[8][5], char accepted_meetings[162][5][1024], c
     fprintf(fp, "%5s Number of Requests Rejected: %d (%.1f%%)\n\n", blanks, rejected_length, rejected_rates);
     fprintf(fp, "Utilization of Time Slot: \n\n");
     fprintf(fp, "%4s Accepted request %10s - %.1f%%\n", blanks, blanks, accepted_utilization);
-    //===================== needs to receive Team & staff info ===============
-
 
     for (i = 0; i < 5; i++) {
         accepted_hours = 0;
@@ -1648,10 +1644,12 @@ bool is_valid_day(char *s1) {
         return false;
     }
     mth_and_day = mth * 100 + dy;
-    if (mth_and_day < 425 || mth_and_day > 514) {
+    // date out of boundary
+    if (mth_and_day < 425 || mth_and_day >= 514) {
         return false;
     } else {
-        if (mth_and_day == 431 || mth_and_day == 430 || mth_and_day == 501 || mth_and_day == 507 || mth_and_day == 508 || mth_and_day == 514) {
+        // sunday, saturday, non-existing date (April 31st)
+        if (mth_and_day == 431 || mth_and_day == 430 || mth_and_day == 501 || mth_and_day == 507 || mth_and_day == 508) {
             return false;
         }
     }
