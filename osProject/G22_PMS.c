@@ -327,6 +327,7 @@ int main() {
     return 0;
 }
 
+
 void create_project_team(int fd[13][2], char *command, int len, int read_manager[8], int read_data[8][5]) {
     char staffName[8][10] = {"Alan", "Billy", "Cathy", "David", "Eva", "Fanny", "Gary", "Helen"};
     char teamName[5][10] = {"Team_A", "Team_B", "Team_C", "Team_D", "Team_E"};
@@ -345,45 +346,17 @@ void create_project_team(int fd[13][2], char *command, int len, int read_manager
         }
         i++;
     }
-    int infosize = i;
-    int manager = useful_inf[2] - 'A';
-    int team = useful_inf[0] - 'A';
-    int project = useful_inf[1] - 'A';
-    int team_no=0;
-    
-    /*
-    Check staff occupy
-    */
-    
-    // 1. check if the prompt consists of more than 4 members.
-    if (infosize > 6 || infosize == 3){
-        if (infosize == 3) {
-            printf("Project Team must be consists of at least one project member.\n");
-        }
-        else {
-            printf("Project team can not be consists of more than 4 staff members.\n");
-        }
-        return;
-    }
-    
-    // 2. check if the prompt consists of duplicate information.
-    for (i = 0; i < infosize; ++i) {
-        for (j = i+1 ; j < infosize; ++j) {
-            if ( strncmp(res[i],res[j], strlen(res[i])) == 0 ) {
-                if (i == 2) {
-                    printf("Manager cannot be a project member of the team.\n");
-                }
-                else {
-                    printf("Prompt consists of duplicate elements. Please try again!\n");
-                }
-                return;
-            }
-        }
-    }
 
-    // 3. check if the manager is the manager of other project
-    //printf("manager %d team %d\n", manager, team);
-    //printf("read_manager[manager] %d\n", read_manager[manager]);
+    int manager = useful_inf[2] - 'A'; // 
+    int team = useful_inf[0] - 'A'; //
+    int project = useful_inf[1] - 'A'; //
+    int team_no=0;
+
+/*
+    Check staff occupy
+     */
+
+    // 1. check if the manager is the manager of other project
     if (read_manager[manager] != -1){
         // if not -1, it is already a manager of other project
         printf("Staff member %s is already a manager of %s\n\n", staffName[manager], teamName[read_manager[manager]]);
@@ -391,25 +364,26 @@ void create_project_team(int fd[13][2], char *command, int len, int read_manager
     }
     
 
-    // 4. check staff member participation count
-    // if manager is already participated in 3 projects,
-
+    // 2. check staff member participation count
+    // if manager is already participating in 3 projects,
     if(proj_participation[manager] >= 3){
         printf("Staff member %s is already a member of 3 other teams\n\n", staffName[manager]);
         return;          
     }      
 
+    // 3. Check if the team has already been created
     if (is_team_created[team] != 0) {
         printf("Team %c has already been created, try a different team\n\n", useful_inf[0]);
         return;
     }
     
+    // 4. Check if the project has already been created
     if (is_project_created[project] != 0) {
         printf("Project %c has already been created, try a different project\n\n", useful_inf[1]);
         return;
     }
 
-    // if staff is already participated in 3 projects,
+    // if staff is already participating in 3 projects,
     for (i = 0; i<3; i++){
         // calculate the position of staff in array
         int pos = useful_inf[3+i] - 'A';
@@ -426,7 +400,7 @@ void create_project_team(int fd[13][2], char *command, int len, int read_manager
     proj_participation[manager]++;
     is_team_created[team] = 1;
     is_project_created[project] = 1;
-    for (i = 0; i<infosize-3; i++){
+    for (i = 0; i<3; i++){
         int pos = useful_inf[3+i] - 'A';
         if (pos < 0) {continue;}
         proj_participation[pos]++;
