@@ -393,6 +393,7 @@ void create_project_team(int fd[13][2], char *command, int len, int read_manager
         }
     }
 
+
     // if pass both requirements, can create project
     // increment project participation count for manager and count
     proj_participation[manager]++;
@@ -408,19 +409,20 @@ void create_project_team(int fd[13][2], char *command, int len, int read_manager
         prev = pos;
     }
 
+
     int useful_inf_len = 8;
     char to_member_message[10];
     char to_manager_message[10];
     char to_project_message[10];
-    char temp[5];
+    char temp[3] = {'\0', '\0', '\0'};
     char manager_message[3] = "MM";
     strcpy(to_member_message, create_pro_team);
-    strcpy(to_manager_message, create_pro_team);
+    strcpy(to_manager_message, create_pro_team); //cp
     strcpy(to_project_message, create_pro_team);
-    strncpy(temp, useful_inf, 2);
-    strcat(to_member_message, temp);
-    strcat(to_manager_message, temp);
-    strcat(to_manager_message, manager_message);
+    temp[0] = useful_inf[0];
+    temp[1] = useful_inf[1];
+    strcat(to_manager_message, temp); //Team Initial project initial
+    strcat(to_manager_message, manager_message); 
     strncpy(temp, useful_inf + 2, i - 2);
     strcat(to_project_message, temp);
     for (i = 2; i < useful_inf_len; i++) {
@@ -433,6 +435,7 @@ void create_project_team(int fd[13][2], char *command, int len, int read_manager
     write(fd[useful_inf[1] - 'A' + 8][1], to_project_message, strlen(to_project_message) + 1);
     sleep(1);
     printf("\n>>>>>> Project Team %c is created.\n", res[0][5]);
+
 }
 
 
