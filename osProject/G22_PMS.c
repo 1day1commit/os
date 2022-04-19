@@ -382,6 +382,8 @@ void create_project_team(int fd[13][2], char *command, int len, int read_manager
     }
 
     // 3. check if the manager is the manager of other project
+    //printf("manager %d team %d\n", manager, team);
+    //printf("read_manager[manager] %d\n", read_manager[manager]);
     if (read_manager[manager] != -1){
         // if not -1, it is already a manager of other project
         printf("Staff member %s is already a manager of %s\n\n", staffName[manager], teamName[read_manager[manager]]);
@@ -421,30 +423,14 @@ void create_project_team(int fd[13][2], char *command, int len, int read_manager
 
     // if pass both requirements, can create project
     // increment project participation count for manager and count
-    //printf("manager %d\n", manager);
     proj_participation[manager]++;
     is_team_created[team] = 1;
     is_project_created[project] = 1;
-    // increment staff
     for (i = 0; i<infosize-3; i++){
-        //printf("useful_inf %c\n", useful_inf[3+i]);
         int pos = useful_inf[3+i] - 'A';
-        //printf("pos %d\n", pos);
         if (pos < 0) {continue;}
         proj_participation[pos]++;
     }
-
-    // printf("participation record\n");
-    // for(i = 0; i<8; i++){
-    //     printf("%d ", proj_participation[i]);
-    // }
-    // printf("\n");
-
-    // printf("manager status\n");
-    // for(i = 0; i<8; i++){
-    //     printf("%d ", read_manager[i]);
-    // }
-    // printf("\n");
    
 
     int useful_inf_len = 8;
@@ -554,6 +540,9 @@ int batch_input_meeting_request(int fd[13][2], char *command) {
     fclose(fp);
     return line_num;
 }
+
+
+
 
 void meeting_attendance_request(char start_date[11], char end_date[11], int read_data[8][5], char accepted_meetings[162][5][1024], char rejected_meetings[162][5][1024], int accepted_length, int rejected_length, char *algorithm) {
     int i, j, k, l;
@@ -683,6 +672,8 @@ void meeting_attendance_request(char start_date[11], char end_date[11], int read
     fclose(fp);
     return;
 }
+
+
 
 void analyse_attendance(char useful_inf[30], char start_date[11], char end_date[11], int time_period, int read_data[8][5], char accepted_meetings[162][5][1024], char rejected_meetings[162][5][1024], int accepted_length, int rejected_length, char *algorithm) {
     int i, j, k, l;
@@ -873,25 +864,15 @@ void analyse_attendance(char useful_inf[30], char start_date[11], char end_date[
         }
          // print last one
         fprintf(fp, "%s have the identical lowest rate of %.1f%%\n", temp_staffName[0], min_attendance);
-        fprintf(fp, "====================================================================================== \n");
 
 
         //
         // print analysis
         //
         // if there are more people with the lowest attendance rate
-
         if (min_dup_count > max_dup_count){
-            fprintf(fp, "\n--------Analysis-------- \n");
-            if ((int)min_attendance == 0){
-                fprintf(fp, ">>>>>> No meeting have been accepted for the projects where staff ");
-            }
-            
-            else{
-                fprintf(fp, ">>>>>> There are more staffs with the lowest attendance rate than the highest.\n");
-                fprintf(fp, ">>>>>> There are many staffs with the projects that have conflicts in meeting time.\n It is advised to reduce the number of meetings for staff ");
-            }
-
+            fprintf(fp, ">>>>>> There are more staffs with the lowest attendance_ ate than the highest.\n");
+            fprintf(fp, ">>>>>> There are many staffs with the projects that have conflicts in meeting time.\n It is advised to reduce the number of meetings for staff ");
             for (i = 1; i<8; i++){
                 if (min_attendance_dup[i] != -1){
                     // there are duplicates
@@ -905,7 +886,6 @@ void analyse_attendance(char useful_inf[30], char start_date[11], char end_date[
 
         // if there are more people with the highest attendance rate
         else if (max_dup_count > min_dup_count){
-            fprintf(fp, "\n--------Analysis-------- \n");
             fprintf(fp, ">>>>>> There are more staffs with the highest attendance rate than the lowest.\n");
             fprintf(fp, ">>>>>> The project meetings are well organized for staff ");
             for (i = 0; i<7; i++){
@@ -921,7 +901,6 @@ void analyse_attendance(char useful_inf[30], char start_date[11], char end_date[
 
         // if identical,
         else if (min_dup_count == max_dup_count){
-            fprintf(fp, "\n--------Analysis-------- \n");
             fprintf(fp, ">>>>>> There are same number of staffs with the highest attendance rate and staff with the lowest attendance rate.\n");
             fprintf(fp, ">>>>>> It is advised to reduce the number of meetings for staffs with the lowest attendance rate.\n");
         }
@@ -942,13 +921,11 @@ void analyse_attendance(char useful_inf[30], char start_date[11], char end_date[
         fprintf(fp, "Here, all staffs have the identical meeting attendance rate.\n");
 
         if (min_attendance == 0){
-            fprintf(fp, "\n--------Analysis-------- \n");
             // meeting may not be
             fprintf(fp, "There is no accepted meeting or the team has not been created\n");
         }
 
         else{
-            fprintf(fp, "\n--------Analysis-------- \n");
             fprintf(fp, "The work distribution is well balanced\n");
         }
 
@@ -960,6 +937,7 @@ void analyse_attendance(char useful_inf[30], char start_date[11], char end_date[
     }
     return;
 }
+
 
 
 void FCFS(char useful_inf[30], int read_data[8][5], char *command) {
@@ -1214,6 +1192,9 @@ void FCFS(char useful_inf[30], int read_data[8][5], char *command) {
     print_schedule(read_data, set_meetings, rejected_meetings, start_date, end_date, index1, index2, time_period, "FCFS");
     return;
 }
+
+
+
 
 void SJF(char useful_inf[30], int read_data[8][5], char *command) {
     int i, j, k, l;
@@ -1541,6 +1522,7 @@ void SJF(char useful_inf[30], int read_data[8][5], char *command) {
     print_schedule(read_data, set_meetings, rejected_meetings, start_date, end_date, approvedMeetingCount, rejectedMeetingCount, time_period, "SJF");
     return;
 }
+
 
 
 
