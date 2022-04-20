@@ -1321,43 +1321,35 @@ void SJF(char useful_inf[30], int read_data[8][5], char *command) {
         }
     }
 
-    /**
-     *
-     * SORTING
-     * candidate_data[][0] = Team_X
-     * candidate_data[][1] = 2022-04-25
-     * candidate_data[][2] = 09:00
-     * candidate_data[][3] = 2
-     *
-     * sort based on the Duration
-     */
-
     char temp[1024];
     int day = 0;
-    for (i = 0; i < candidate; i++) {
+
+    /**
+     * sort based on duration of date
+     */
+    for (i = 0; i < candidate-1; i++) {
         for (j = i + 1; j < candidate; j++) {
-            if (strcmp(candidate_data[i][3], candidate_data[j][3]) > 0) {
+            if (strcmp(candidate_data[i][0], candidate_data[j][0]) > 0) {
                 // then swap
                 for (k = 0; k < 5; k++) {
                     strcpy(temp, candidate_data[i][k]);
                     strcpy(candidate_data[i][k], candidate_data[j][k]);
                     strcpy(candidate_data[j][k], temp);
                 }
-                day++;
             }
         }
     }
 
+
     /**
-     * sort based on the start time
+     *
+     * sort based on the Duration
      */
     memset(temp, 0, sizeof(temp));
-    for (i = 0; i < candidate; i++) {
+    for (i = 0; i < candidate-1; i++) {
         for (j = i + 1; j < candidate; j++) {
-            // should be from same day
-            if (strcmp(candidate_data[i][3], candidate_data[j][3]) == 0) {
-                if (strcmp(candidate_data[i][2], candidate_data[j][2]) > 0) {
-                    // then swap
+            if (strcmp(candidate_data[i][0], candidate_data[j][0]) == 0) {
+                if (atoi(candidate_data[i][3]) > atoi(candidate_data[j][3])) {
                     for (k = 0; k < 5; k++) {
                         strcpy(temp, candidate_data[i][k]);
                         strcpy(candidate_data[i][k], candidate_data[j][k]);
@@ -1365,99 +1357,48 @@ void SJF(char useful_inf[30], int read_data[8][5], char *command) {
                     }
                 }
             }
+
         }
     }
 
-
-    /**
-     * sort based on duration of date
-     */
-    memset(temp, 0, sizeof(temp));
-    for (i = 0; i < candidate; i++) {
-        for (j = i + 1; j < candidate; j++) {
-            // should be from same day
-            if (strcmp(candidate_data[i][3], candidate_data[j][3]) == 0) {
-                if (strcmp(candidate_data[i][2], candidate_data[j][2]) == 0) {
-                    if (strcmp(candidate_data[i][1], candidate_data[j][1]) > 0) {
-                        // then swap
-                        for (k = 0; k < 5; k++) {
-                            strcpy(temp, candidate_data[i][k]);
-                            strcpy(candidate_data[i][k], candidate_data[j][k]);
-                            strcpy(candidate_data[j][k], temp);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * sort based on name (project alphabet)
-     */
-
-    memset(temp, 0, sizeof(temp));
-    for (i = 0; i < candidate; i++) {
-        for (j = i + 1; j < candidate; j++) {
-            // should be from same day
-            if (strcmp(candidate_data[i][3], candidate_data[j][3]) == 0) {
-                if (strcmp(candidate_data[i][2], candidate_data[j][2]) == 0) {
-                    if (strcmp(candidate_data[i][1], candidate_data[j][1]) == 0) {
-                        if (strcmp(candidate_data[i][0], candidate_data[j][0]) > 0) {
-                            // then swap
-                            for (k = 0; k < 5; k++) {
-                                strcpy(temp, candidate_data[i][k]);
-                                strcpy(candidate_data[i][k], candidate_data[j][k]);
-                                strcpy(candidate_data[j][k], temp);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
 
     // run SJF
     int endTime = 0;
     int begin = 0;
-    begin = atoi(candidate_data[0][2]);
+    int track, check;
+    //begin = atoi(candidate_data[0][2]);
     for (i = 0; i < candidate; i++) {
-        // until it is not last meeting
-        if (i != candidate && i != 0) {
-            // check if the date are same
-            // if not, reset the end time
-            // e.g: candidate_data[n][0] = 2022-04-25
-            if (strcmp(candidate_data[i - 1][0], candidate_data[i][0]) != 0) {
-                endTime = 0;
+        track = 1;
+        check = 1;
+
+        int temp = approvedMeetingCount;
+        for (k = 0; k < temp; k++) {
+            //to check for new meetings with the already scheduled meetings
+            if (strcmp(set_meetings[k][0], candidate_data[i][0]) == 0) {//if meeting on the same day
+                track = 0;
+                //if the meeting does not conflict with the time period of an already scheduled meeting
+                if (strcmp(candidate_data[i][2], set_meetings[k][2]) <= 0 && strcmp(candidate_data[i][4], set_meetings[k][2]) <= 0) {
+                    continue;
+                }
+                if (strcmp(candidate_data[i][2], set_meetings[k][4]) >= 0 && strcmp(candidate_data[i][4], set_meetings[k][4]) >= 0) {
+                    continue;
+                } else {
+                    check = 0;
+                    for (l = 0; l < 5; l++) {
+                        strcpy(rejected_meetings[rejectedMeetingCount][l], candidate_data[i][l]);
+                    }
+                    rejectedMeetingCount++;
+                    break;
+                }
             }
         }
-
-        // extract start time
-        int startTime = atoi(candidate_data[i][2]);
-
-        // if end time is bigger than start time, reject
-        // e.g: previous meeting ends at 11:00AM and next meeting starts at 9:00AM
-        if (endTime > startTime) {
-            rejectedMeetingCount++;
-
-            // copy meeting info as rejected
-            for (j = 0; j < 5; j++) {
-                strcpy(rejected_meetings[rejectedMeetingCount - 1][j], candidate_data[i][j]);
-            }
-        }
-
-        // if not,
-        else {// approved as possible meeting
-            // copy meeting info as approved
-            for (k = 0; k < 5; k++) {
-                strcpy(set_meetings[approvedMeetingCount][k], candidate_data[i][k]);
+        if (check == 1 || track == 1) {
+            for (l = 0; l < 5; l++) {
+                strcpy(set_meetings[approvedMeetingCount][l], candidate_data[i][l]);
             }
             approvedMeetingCount++;
-            endTime = atoi(candidate_data[i][4]);
         }
     }
-
-    // approvedMeeting : number of meeting - rejected meeting
-    approvedMeetingCount = idx - rejectedMeetingCount;
 
 
     if (strcmp(check_origin, "SAR") == 0) {//For part 3c
