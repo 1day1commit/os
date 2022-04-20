@@ -1645,7 +1645,7 @@ bool is_valid_day(char *s1) {
     }
     mth_and_day = mth * 100 + dy;
     // date out of boundary
-    if (mth_and_day < 425 || mth_and_day >= 514) {
+    if (mth_and_day < 425 || mth_and_day > 514) {
         return false;
     } else {
         // sunday, saturday, non-existing date (April 31st)
