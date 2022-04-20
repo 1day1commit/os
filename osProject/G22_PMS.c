@@ -1649,7 +1649,7 @@ bool is_valid_day(char *s1) {
         return false;
     } else {
         // sunday, saturday, non-existing date (April 31st)
-        if (mth_and_day == 431 || mth_and_day == 430 || mth_and_day == 501 || mth_and_day == 507 || mth_and_day == 508) {
+        if (mth_and_day == 431 || mth_and_day == 501 || mth_and_day == 508) {
             return false;
         }
     }
