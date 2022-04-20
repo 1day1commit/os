@@ -4,7 +4,7 @@
 #include <string.h>
 #include <unistd.h>
 #define CHILD_NUMBER 13
-#define MAX_LINE 162
+#define MAX_LINE 300
 
 struct Staff {
     int Project[5];
@@ -38,11 +38,11 @@ char **split(char *str, char *delimiter);
 void create_project_team(int fd[13][2], char *command, int read_manager[8], int read_data[8][5]);
 int single_input_meeting_request(int fd[13][2], char *useful_inf);
 int batch_input_meeting_request(int fd[13][2], char *useful_inf);
-void meeting_attendance_request(char start_date[11], char end_date[11], int read_data[8][5], char accepted_meetings[162][5][1024], char rejected_meetings[162][5][1024], int index1, int index2, char *algorithm);
+void meeting_attendance_request(char start_date[11], char end_date[11], int read_data[8][5], char accepted_meetings[300][5][1024], char rejected_meetings[300][5][1024], int index1, int index2, char *algorithm);
 void FCFS(char useful_inf[30], int read_data[8][5], char *command);
 void SJF(char useful_inf[30], int read_data[8][5], char *command);
-void print_schedule(int read_data[8][5], char accepted_meetings[162][5][1024], char rejected_meetings[162][5][1024], char start_date[11], char end_date[11], int accepted_length, int rejected_length, int time_period, char *algorithm);
-void analyse_attendance(char useful_inf[30], char start_date[11], char end_date[11], int time_period, int read_data[8][5], char accepted_meetings[162][5][1024], char rejected_meetings[162][5][1024], int index1, int index2, char *algorithm);
+void print_schedule(int read_data[8][5], char accepted_meetings[300][5][1024], char rejected_meetings[300][5][1024], char start_date[11], char end_date[11], int accepted_length, int rejected_length, int time_period, char *algorithm);
+void analyse_attendance(char useful_inf[30], char start_date[11], char end_date[11], int time_period, int read_data[8][5], char accepted_meetings[300][5][1024], char rejected_meetings[300][5][1024], int index1, int index2, char *algorithm);
 
 // Project staff count
 int proj_participation[8] = {0, 0, 0, 0, 0, 0, 0, 0};
@@ -128,14 +128,14 @@ int main() {
         char information[8];
 
         while (true) {
-            if ((num = read(toChild[index][0], buf, 10)) > 0) {
+            if ((num = read(toChild[index][0], buf, 100)) > 0) {
                 operation[0] = buf[0];
                 operation[1] = buf[1];
                 operation[2] = 0;
                 strncpy(information, buf + 2, 6);
 
                 if (strcmp(operation, pass_data) == 0) {
-                    write(toParent[index][1], staff[index].Project, sizeof(staff[index].Project));
+                    write(toParent[index][1], &staff[index].Project, sizeof(staff[index].Project));
                     continue;
                 }
 
@@ -406,6 +406,7 @@ void create_project_team(int fd[13][2], char *command, int read_manager[8], int 
     strcpy(to_project_message, create_pro_team);
     temp[0] = useful_inf[0];
     temp[1] = useful_inf[1];
+    strcat(to_member_message, temp);
     strcat(to_manager_message, temp); //Team Initial project initial
     strcat(to_manager_message, manager_message); 
     strncpy(temp, useful_inf + 2, useful_inf_len - 2);
@@ -502,7 +503,7 @@ int batch_input_meeting_request(int fd[13][2], char *command) {
 }
 
 
-void meeting_attendance_request(char start_date[11], char end_date[11], int read_data[8][5], char accepted_meetings[162][5][1024], char rejected_meetings[162][5][1024], int accepted_length, int rejected_length, char *algorithm) {
+void meeting_attendance_request(char start_date[11], char end_date[11], int read_data[8][5], char accepted_meetings[300][5][1024], char rejected_meetings[300][5][1024], int accepted_length, int rejected_length, char *algorithm) {
     int i, j, k, l;
     int total_hours, total_meeting;
     float average;
@@ -630,7 +631,7 @@ void meeting_attendance_request(char start_date[11], char end_date[11], int read
 }
 
 
-void analyse_attendance(char useful_inf[30], char start_date[11], char end_date[11], int time_period, int read_data[8][5], char accepted_meetings[162][5][1024], char rejected_meetings[162][5][1024], int accepted_length, int rejected_length, char *algorithm) {
+void analyse_attendance(char useful_inf[30], char start_date[11], char end_date[11], int time_period, int read_data[8][5], char accepted_meetings[300][5][1024], char rejected_meetings[300][5][1024], int accepted_length, int rejected_length, char *algorithm) {
     int i, j, k, l;
     int staffHour, team_no, total_meeting;
     float attendance;
@@ -905,7 +906,7 @@ void FCFS(char useful_inf[30], int read_data[8][5], char *command) {
     // 2. read project info
     // Team_A 2022-04-25 09:00 2
     // 3. store data
-    char meeting_data[162][5][1024];
+    char meeting_data[300][5][1024];
     char buffer[1024];
     char *token = NULL;
     int idx = 0;
@@ -959,10 +960,10 @@ void FCFS(char useful_inf[30], int read_data[8][5], char *command) {
         meeting_data[i][3][strlen(meeting_data[i][3])] = '\0';
     }
 
-    char set_meetings[162][5][1024];     //used for keeping all the accepted meetings
-    char rejected_meetings[162][5][1024];//used for keeping all the rejected meetings
+    char set_meetings[300][5][1024];     //used for keeping all the accepted meetings
+    char rejected_meetings[300][5][1024];//used for keeping all the rejected meetings
 
-    for (i = 0; i < 162; i++) {
+    for (i = 0; i < 300; i++) {
         for (j = 0; j < 5; j++) {
             strcpy(set_meetings[i][j], "0");//using "0" as placeholders
             strcpy(rejected_meetings[i][j], "0");
@@ -1163,14 +1164,14 @@ void SJF(char useful_inf[30], int read_data[8][5], char *command) {
         - candidate_data: store meeting requests that satisfies all restrictions
      */
 
-    char set_meetings[162][5][1024];
-    char rejected_meetings[162][5][1024];
-    char meeting_data[162][5][1024];
-    char candidate_data[162][5][1024];
+    char set_meetings[300][5][1024];
+    char rejected_meetings[300][5][1024];
+    char meeting_data[300][5][1024];
+    char candidate_data[300][5][1024];
 
 
     // initialize both arrays
-    for (i = 0; i < 162; i++) {
+    for (i = 0; i < 300; i++) {
         for (j = 0; j < 5; j++) {
             strcpy(set_meetings[i][j], "0");//using "0" as placeholders
             strcpy(rejected_meetings[i][j], "0");
@@ -1471,7 +1472,7 @@ void SJF(char useful_inf[30], int read_data[8][5], char *command) {
 }
 
 
-void print_schedule(int read_data[8][5], char accepted_meetings[162][5][1024], char rejected_meetings[162][5][1024], char start_date[11], char end_date[11], int accepted_length, int rejected_length, int time_period, char *algorithm) {
+void print_schedule(int read_data[8][5], char accepted_meetings[300][5][1024], char rejected_meetings[300][5][1024], char start_date[11], char end_date[11], int accepted_length, int rejected_length, int time_period, char *algorithm) {
     int i, j, k, l;
 
     int total_length = accepted_length + rejected_length;
@@ -1510,6 +1511,7 @@ void print_schedule(int read_data[8][5], char accepted_meetings[162][5][1024], c
     for (i = 0; i < 8; i++) {
         fprintf(fp, "====================================================================================== \n");
         fprintf(fp, "Staff: %s \n\n", staffName[i]);
+
         fprintf(fp, "Date             Start    End       Team         Project           \n");
         fprintf(fp, "====================================================================================== \n");
 
